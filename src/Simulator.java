@@ -58,7 +58,7 @@ public class Simulator {
         this.X1 = new int[16];
         this.X2 = new int[16];
         this.X3 = new int[16];
-        M = new Memory(size);
+        this.M = new Memory(size);
     }
     
 }
