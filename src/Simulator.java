@@ -1,49 +1,49 @@
-/*
+/**
  * The main class that simulates the operations of the computer
  */
 public class Simulator {
-    /* General purpose register 1. */
+    /** General purpose register 1. */
     int[] R0;
 
-    /* General purpose register 2. */
+    /** General purpose register 2. */
     int[] R1;
 
-    /* General purpose register 3. */
+    /** General purpose register 3. */
     int[] R2;
 
-    /* General purpose register 4. */
+    /** General purpose register 4. */
     int[] R3;
 
-    /* Program counter. */
+    /** Program counter. */
     int[] PC;
     
-    /* Conditional counter. */
+    /** Conditional counter. */
     int[] CC;
     
-    /* Instruction register. */
+    /** Instruction register. */
     int[] IR;
 
-    /* Memory address register. */
+    /** Memory address register. */
     int[] MAR;
 
-    /* Memory buffer register. */
+    /** Memory buffer register. */
     int[] MBR;
 
-    /* Index register 1. */
+    /** Index register 1. */
     int[] X1;
 
-    /* Index register 2. */
+    /** Index register 2. */
     int[] X2;
 
-    /* Index register 3. */
+    /** Index register 3. */
     int[] X3;
 
-    /* Main memory. */
+    /** Main memory. */
     Memory M;
 
-    /* Creates a simulator instance with memory of size size
+    /** Creates a simulator instance with memory of size size
      * 
-     * @param   size    the size of the memory for this simulated computer
+     * @param   size    the size of the memory for this simulated computer in 16-bit words
      */
     public Simulator(int size) {
         this.R0 = new int[16];

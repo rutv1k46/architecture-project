@@ -1,13 +1,13 @@
-/*
+/**
  * Memory for the LOR simulator
  */
 public class Memory {
-    /*
+    /**
      * An array for the memory itself
      */
     private int[] M;
 
-    /*
+    /**
      * Creates an instance of memory of with size words initially with all
      * words set to zero
      * 
@@ -17,7 +17,7 @@ public class Memory {
         this.M = new int[size];
     }
 
-    /* 
+    /** 
      * Returns the value at address a.
      * 
      * @param   a       The address of the value being accessed
@@ -42,7 +42,7 @@ public class Memory {
         return ret;
     }
 
-    /*
+    /**
      * Sets the value at address a
      * 
      * @param   a       Memory address at which to set the value to v
