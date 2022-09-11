@@ -11,11 +11,17 @@ public class Interface extends JFrame {
     JPanel panel;
     /** A simulator for this interace to interact with and display. */
     Simulator S;
+    /** The names of the registers in the simulator (that are also displated on the interface). */
+    String[] REG_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR", "MAR", "MBR", "MFR", "X1", "X2", "X3"};
+    /** The sizes of the registers in the simulator (that are also displated on the interface). */
+    int[] REG_SIZES = {16, 16, 16, 16, 12, 4, 16, 12, 16, 4, 16, 16, 16};
+    /** An array of the register objects for the registers. */
+    Register[] registers;
 
     /**
      * Constructs and opens an interface with a simulator ready to run with all registers and memory intially set to zero.
      */
-    public Interface() {
+    public Interface(Simulator S) {
         // Make a graphical user interface frame for this interface
         this.setTitle("LOR Simulator");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -25,14 +31,13 @@ public class Interface extends JFrame {
         this.panel = new JPanel(new GridLayout(20,1));
         this.add(this.panel);
 
-        // Create the computer simulator instance for this interface
-        int size = 2048;
-        this.S = new Simulator(size);
+        // Set the simulator instance for this interface
+        this.S = S;
 
-        // Add registers
-        addRegisters();
+        // Create registers
+        registers = addRegisters();
 
-        // Add controls
+        // Create controls
         addControls();
 
         // Set visibile
@@ -40,15 +45,14 @@ public class Interface extends JFrame {
     }
 
     /**
-     * Adds all the registers to the interface. (Each register is labeled and has radio buttons to control all of its bits.) For now, all the register names and sizes are coded as literals in this function, but this could be easily extended to read from a register name and size file.
+     * Adds all the registers to the interface. (Each register is labeled and has radio buttons to control all of its bits.) For now, all the register names and sizes are coded as constant literals in this class, but this could be easily extended to read from a register name and size file.
      */
-    public void addRegisters() {
-        String[] reg_names = {"R0", "R1", "R2", "R3", "PC", "CC", "IR", "MAR", "MBR", "MFR", "X1", "X2", "X3"};
-        int[] reg_sizes = {16, 16, 16, 16, 12, 4, 16, 12, 16, 4, 16, 16, 16};
-        Register[] registers = new Register[reg_names.length];
-        for (int i = 0; i < reg_names.length; i++) {
-            registers[i] = new Register(this.S, this.panel, reg_names[i], reg_sizes[i]);
+    public Register[] addRegisters() {
+        Register[] registers = new Register[REG_NAMES.length];
+        for (int i = 0; i < REG_NAMES.length; i++) {
+            registers[i] = new Register(this.S, this.panel, REG_NAMES[i], REG_SIZES[i]);
         }
+        return registers;
     }
 
     /**
@@ -69,9 +73,11 @@ public class Interface extends JFrame {
      */
     public void updateDisplay() {
         // Update registers
-        
-        // Update halt 
-        // Update privileged
+        for (int i = 0; i < this.registers.length; i++) {
+            this.registers[i].update(this.S.getRegister(REG_NAMES[i]));
+        }
+
+        // Update other things... in the future
     }
 }
 
@@ -125,6 +131,31 @@ class Register {
         }
         panel.add(box);
     }
+
+    /**
+     * Updates a register's value (and the visual state of its buttons) with the passed value.
+     * 
+     * @param v an array of integers (all zero or one) that is the value to set this register to
+     */
+    public void update(int[] v) {
+        // Confirm that v is of the right length
+        if (v.length != this.arr.length) {
+            System.out.println("in Register update(), v was of length "+v.length+" but should have had length "+this.arr.length);
+            return;
+        }
+        // Confirm that v contains only zeros and ones
+        for (int i = 0; i < this.arr.length; i++) {
+            if (v[i] != 0 && v[i] != 1) {
+                System.out.println("in Register update(), v had value "+v[i]+" at position "+i+" but should only have zeros and ones");
+                return;
+            }
+        }
+        // Update the register's array
+        for (int i = 0; i < this.arr.length; i++) {
+            this.arr[i] = v[i];
+        }
+    }
+
     /**
      * Creates a string of the form "name: x1x2x3x4...xn" where xi is the ith bit of this register.
      * 

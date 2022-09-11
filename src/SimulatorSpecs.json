@@ -1,0 +1,10 @@
+{
+    "registers": [
+        {"name":"R0","size":16},
+        {"name":"R1","size":16}
+    ],
+    "memorySize": 2048,
+    "opcodes": [
+        123
+    ]
+}

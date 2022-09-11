@@ -3,6 +3,9 @@
  */
 public class Main {
     public static void main(String[] args) {
-        new Interface();
+        int memorySize = 2048;
+        Simulator S = new Simulator(memorySize);
+        Interface I = new Interface(S);
+        S.giveInterface(I);
     }
 }

@@ -26,6 +26,13 @@ public class Utilities {
      * @return -1 if size is not sufficient to store the value of a and otherwise returns the converted-to-binary version as an int array of zeros and ones
      */
     public static int[] dec2bin(int a, int size) {
-        //TODO
+        int[] v = new int[size];
+        for (int i = size - 1; i >= 0; i --) {
+            if (a / 2 > 0) {
+                v[i] = 1;
+            } 
+            a -= a/2;
+        }
+        return v;
     }
 }

@@ -1,3 +1,4 @@
+import java.util.Arrays;
 /**
  * The main class that simulates the operations of the computer
  */
@@ -41,6 +42,9 @@ public class Simulator {
     /** Main memory. */
     Memory M;
 
+    /** An interface that is notified when the state of this simulated machine changes. */
+    Interface I;
+
     /** Creates a simulator instance with memory of size size
      * 
      * @param   size    the size of the memory for this simulated computer in 16-bit words
@@ -66,13 +70,50 @@ public class Simulator {
      */
     public void step() {
         /*    
-        Copy address from the PC to the MAR
-        Increment PC
-        Load the MBR with the data from Memory[MAR]
-        Copy the MBR to the IR
         Decode the instruction in the IR
         Execute the decoded instruction
         */
+        // Copy address from PC to MAR
+        updateRegister("MAR", this.PC);
+
+        // Increment PC
+        incrementPC();
+
+        // Load the MBR with the data from memory at the address specified by the contents of MAR
+        load();
+
+        // Copy MBR to IR
+        registerCopy(this.MBR, this.IR);
+
+        // Execute the instruction now in the IR
+        executeInstruction();
+
+        // Notify the interface that changes may have occured
+        this.I.updateDisplay();
+    }
+
+    /**
+     * Executes the instruction specified by the contents of the IR.
+     */
+    public void executeInstruction() {
+        // Decode the instruction in the IR
+        int[] opcode = Arrays.copyOfRange(this.IR, 0, 6);
+        int[] R = Arrays.copyOfRange(this.IR, 6, 8);
+        int[] IX = Arrays.copyOfRange(this.IR, 8, 10);
+        int[] I = Arrays.copyOfRange(this.IR, 10, 11);
+        int[] address = Arrays.copyOfRange(this.IR, 11, 16);
+        
+        // Check that this is a valid opcode
+    }
+
+    /**
+     * Loads from memory the contents at the address specified by the MAR into the MBR.
+     */
+    public void load() {
+        int[] v = this.M.get(Utilities.bin2dec(this.MAR));
+        for (int i = 0; i < this.MBR.length; i++) {
+            this.MBR[i] = v[i];
+        }
     }
 
     /**
@@ -128,8 +169,140 @@ public class Simulator {
                 for (int i=0; i<this.X3.length; i++) this.X3[i] = v[i];
                 break;
             default:
-                System.out.println("In the set function in the Simulator class recieved string: "+name);
+                System.out.println("In the updateRegister function in the Simulator class recieved string: "+name);
         }
     }
-    
+
+    /**
+     * Returns the value of the register with name name.
+     * 
+     * @param name the name of the register whose value is returned
+     * @return an int array of only zeros and ones giving the value of the register of name name
+     */
+    public int[] getRegister(String name) {
+        // Switch over the name of the register
+        switch (name) {
+            case "R0":
+                return R0;
+            case "R1":
+                return R1;
+            case "R2":
+                return R2;
+            case "R3":
+                return R3;
+            case "PC":
+                return PC;
+            case "CC":
+                return CC;
+            case "IR":
+                return IR;
+            case "MAR":
+                return MAR;
+            case "MBR":
+                return MBR;
+            case "X1":
+                return X1;
+            case "X2":
+                return X2;
+            case "X3":
+                return X3;
+            default:
+                System.out.println("In the getRegister function in the Simulator class recieved string: "+name);
+        }
+        int[] r = {0};
+        return r;
+    }
+
+    /**
+     * Increments the value of the register with name name. If value is already as high as possible, increments to zero.
+     * 
+     * @param name the name of the register whose value is being incremented
+     */
+    public int[] getRegister(String name) {
+        // Switch over the name of the register
+        switch (name) {
+            case "R0":
+                v = R0;
+                d = Utilties.bin2dec(v) + 1;
+                if (d >= Math.pow(2,v.length)) {
+                    d = 0;
+                }
+                v = dec2bin(v);
+                return R0;
+            case "R1":
+                return R1;
+            case "R2":
+                return R2;
+            case "R3":
+                return R3;
+            case "PC":
+                return PC;
+            case "CC":
+                return CC;
+            case "IR":
+                return IR;
+            case "MAR":
+                return MAR;
+            case "MBR":
+                return MBR;
+            case "X1":
+                return X1;
+            case "X2":
+                return X2;
+            case "X3":
+                return X3;
+            default:
+                System.out.println("In the getRegister function in the Simulator class recieved string: "+name);
+        }
+        int[] r = {0};
+        return r;
+    }
+
+    /**
+     * Increments the PC.
+     */
+    public int[] incrementPC()) {
+        d = Utilties.bin2dec(this.PC) + 1;
+        if (d >= Math.pow(2,v.length)) {
+            d = 0;//TODO figure out what actually should be done in this case.
+        }
+        v = dec2bin(v);
+        for (i = 0; i < this.PC.length; i++) {
+            this.PC[i] = v[i];
+        }
+    }
+
+    /**
+     * Gives a reference to an interface object so that this simulator can update/notify the interface when changes occur and it can update accordingly.
+     * 
+     * @param I the interface object being given to this simulator
+     */
+    public void giveInterface(Interface I) {
+        this.I = I;
+    }
+
+    /**
+     * Copies the value from the from register to the to register.
+     * 
+     * @param from the register from which a value is being copied
+     * @param to the register to which a value is being copied
+     */
+    public void registerCopy(int[] from, int[] to) {
+        // Check that the two registers are of the same length
+        if (from.length != to.length) {
+            System.out.println("in registerCopy of Simulator, from has length "+from.length+" whereas to has length "+to.length+" but they should be the same");
+            return;
+        }
+        // Check that the value being copied consists only of ones and zeros (as it should)
+        for (int i = 0; i < from.length; i++) {
+            if (from[i] != 0 && from[i] != 1) {
+                System.out.println("in registerCopy of Simulator, from contains a "+from[i]+" at position "+i+" but should conly contain ones and zeros");
+                return;
+            }
+        }
+        // Perform the copy
+        for (int i = 0; i < from.length; i++) {
+            to[i] = from[i];
+        }
+    }
 }
