@@ -20,6 +20,8 @@ public class Interface extends JFrame {
 
     /**
      * Constructs and opens an interface with a simulator ready to run with all registers and memory intially set to zero.
+     * 
+     * @param S the simulator that this interface is being created for
      */
     public Interface(Simulator S) {
         // Make a graphical user interface frame for this interface
@@ -46,6 +48,8 @@ public class Interface extends JFrame {
 
     /**
      * Adds all the registers to the interface. (Each register is labeled and has radio buttons to control all of its bits.) For now, all the register names and sizes are coded as constant literals in this class, but this could be easily extended to read from a register name and size file.
+     * 
+     * @return an array of the register objects that get created and added to the interface
      */
     public Register[] addRegisters() {
         Register[] registers = new Register[REG_NAMES.length];

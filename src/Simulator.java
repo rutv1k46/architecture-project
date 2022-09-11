@@ -214,60 +214,15 @@ public class Simulator {
     }
 
     /**
-     * Increments the value of the register with name name. If value is already as high as possible, increments to zero.
-     * 
-     * @param name the name of the register whose value is being incremented
-     */
-    public int[] getRegister(String name) {
-        // Switch over the name of the register
-        switch (name) {
-            case "R0":
-                v = R0;
-                d = Utilties.bin2dec(v) + 1;
-                if (d >= Math.pow(2,v.length)) {
-                    d = 0;
-                }
-                v = dec2bin(v);
-                return R0;
-            case "R1":
-                return R1;
-            case "R2":
-                return R2;
-            case "R3":
-                return R3;
-            case "PC":
-                return PC;
-            case "CC":
-                return CC;
-            case "IR":
-                return IR;
-            case "MAR":
-                return MAR;
-            case "MBR":
-                return MBR;
-            case "X1":
-                return X1;
-            case "X2":
-                return X2;
-            case "X3":
-                return X3;
-            default:
-                System.out.println("In the getRegister function in the Simulator class recieved string: "+name);
-        }
-        int[] r = {0};
-        return r;
-    }
-
-    /**
      * Increments the PC.
      */
-    public int[] incrementPC()) {
-        d = Utilties.bin2dec(this.PC) + 1;
-        if (d >= Math.pow(2,v.length)) {
+    public void incrementPC() {
+        int d = Utilities.bin2dec(this.PC) + 1;
+        if (d >= Math.pow(2,this.PC.length)) {
             d = 0;//TODO figure out what actually should be done in this case.
         }
-        v = dec2bin(v);
-        for (i = 0; i < this.PC.length; i++) {
+        int[] v = Utilities.dec2bin(d, this.PC.length);
+        for (int i = 0; i < this.PC.length; i++) {
             this.PC[i] = v[i];
         }
     }
