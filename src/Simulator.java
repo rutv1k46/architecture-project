@@ -94,6 +94,9 @@ public class Simulator {
 
         // Notify the interface that changes may have occured
         this.I.updateDisplay();
+
+        // Print to console the nonzero contents at this moment
+        System.out.println(this.M);
     }
 
     /**
@@ -182,6 +185,17 @@ public class Simulator {
         for (int i = 0; i < this.MBR.length; i++) {
             this.MBR[i] = v[i];
         }
+        // Notify the interface that changes may have been made
+        this.I.updateDisplay();
+    }
+
+    /**
+     * Stores in memory the contents in MBR at the address specified by the MAR.
+     */
+    public void store() {
+        this.M.set(Utilities.bin2dec(this.MAR), this.MBR);
+        // Notify the interface that changes may have been made
+        this.I.updateDisplay();
     }
 
     /**

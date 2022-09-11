@@ -5,5 +5,8 @@ public class TestUtilities {
         for (int i = 0; i < 10; i++) {
             System.out.println(Arrays.toString(Utilities.dec2bin(i,5)));
         }
+
+        int[] a = {0, 0, 1, 0, 0};
+        System.out.println(Utilities.bin2dec(a));
     }
 }

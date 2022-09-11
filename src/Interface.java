@@ -69,7 +69,8 @@ public class Interface extends JFrame {
         // Create a load button that loads into the MBR the value at the MAR address in memory
         this.panel.add(createLoadButton());
 
-        this.panel.add(new JButton("Load"));
+        // Create a store button that stores into the memory at address MAR the value in MBR
+        this.panel.add(createStoreButton());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -102,10 +103,10 @@ public class Interface extends JFrame {
      * Creates load button for panel.
      */
     public JButton createLoadButton() {
-        // Create the single step button
+        // Create the load button
         JButton button = new JButton("Load");
 
-        // Add an action listener that can call the simulator's step function upon this button being clicked
+        // Add an action listener that can call the simulator's load function upon this button being clicked
         button.addActionListener(new InterfaceActionListener(this.S) {
             public void actionPerformed(ActionEvent e) {
                 this.S.load();
@@ -117,10 +118,27 @@ public class Interface extends JFrame {
     }
 
     /**
+     * Creates store button for panel.
+     */
+    public JButton createStoreButton() {
+        // Create the store button
+        JButton button = new JButton("Store");
+
+        // Add an action listener that can call the simulator's store function upon this button being clicked
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                this.S.store();
+            }
+        });
+
+        // Return this button
+        return button;
+    }
+
+    /**
      * Updates the display based on the values in the simulator S
      */
     public void updateDisplay() {
-        System.out.println("here");
         // Update registers
         for (int i = 0; i < this.registers.length; i++) {
             this.registers[i].update(this.S.getRegister(REG_NAMES[i]));
@@ -228,7 +246,6 @@ class Register {
             if (this.arr[i] == 0) {
                 this.buttons[i].setSelected(false);
             } else {
-                System.out.println("hi");
                 this.buttons[i].setSelected(true);
             }
         }

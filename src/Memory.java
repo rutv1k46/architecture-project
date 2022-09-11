@@ -25,24 +25,18 @@ public class Memory {
      * Returns the value at address a.
      * 
      * @param   a       The address of the value being accessed
-     * @return          Returns an array of length 1+WORD_SIZE where the first value
-     *                  is a 0 if a is a valid address or -1 if a is an 
-     *                  invalid address, and the rest of the values are the value 
-     *                  in memory at address a if a is a valid address, else 0
+     * @return          Returns an array whose values are the bits in memory at address a if a is a valid address, else 0
     */
     public int[] get(int a) {
         int[] ret = new int[WORD_SIZE];
         // Checks if a is a valid memory address
         if (a < 0 || a >= M.length) {
-            // Returns -1,-1 if a is not a valid address
-            ret[0] = -1;
             System.out.println("attempt to access address " + a);
             return ret;
         }
-        // Returns 0,M[a] if a is a valid address
-        ret[0] = 0;
-        for (int i = 1; i < ret.length; i++) {
-            ret[i] = M[a][i-1];
+        // Returns value of M[a] if a is a valid address
+        for (int i = 0; i < WORD_SIZE; i++) {
+            ret[i] = M[a][i];
         }
         return ret;
     }
@@ -77,5 +71,29 @@ public class Memory {
             M[a][i] = v[i];
         }
         return 0;
+    }
+
+    /**
+     * Converts this memory instance into a readable string by showing a line for each nonzero location in memory and on that line showing the address and the contents.
+     */
+    @Override
+    public String toString() {
+        String s = "";
+        for (int i = 0; i < M.length; i++) {
+            boolean nonzero = false;
+            for (int j = 0; j < WORD_SIZE; j++) {
+                if (M[i][j] != 0) {
+                    nonzero = true;
+                }
+            }
+            if (nonzero) {
+                s += i + ": ";
+                for (int j = 0; j < WORD_SIZE; j++) {
+                    s += M[i][j];
+                }
+                s += '\n';
+            }
+        }
+        return s;
     }
 }

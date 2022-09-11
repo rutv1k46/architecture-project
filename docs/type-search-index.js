@@ -1,1 +1,1 @@
-typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"<Unnamed>","l":"Interface"},{"p":"<Unnamed>","l":"Memory"},{"p":"<Unnamed>","l":"Simulator"},{"p":"<Unnamed>","l":"Utilities"}];updateSearchResults();
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"<Unnamed>","l":"Interface"},{"p":"<Unnamed>","l":"Memory"},{"p":"<Unnamed>","l":"Simulator"},{"p":"<Unnamed>","l":"TestUtilities"},{"p":"<Unnamed>","l":"Utilities"}];updateSearchResults();
