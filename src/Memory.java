@@ -31,7 +31,7 @@ public class Memory {
      *                  in memory at address a if a is a valid address, else 0
     */
     public int[] get(int a) {
-        int[] ret = new int[2];
+        int[] ret = new int[WORD_SIZE];
         // Checks if a is a valid memory address
         if (a < 0 || a >= M.length) {
             // Returns -1,-1 if a is not a valid address

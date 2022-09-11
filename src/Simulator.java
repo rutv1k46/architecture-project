@@ -30,6 +30,9 @@ public class Simulator {
     /** Memory buffer register. */
     int[] MBR;
 
+    /** Machine fault register. */
+    int[] MFR;
+
     /** Index register 1. */
     int[] X1;
 
@@ -45,6 +48,10 @@ public class Simulator {
     /** An interface that is notified when the state of this simulated machine changes. */
     Interface I;
 
+    /** Constant array of the valid opcodes as decimal integers. */
+    int[] OPCODES           = {   1,    2,    3,   33,   34,   8,    9,   10,   11,   12,   13,   14,   15};
+    String[] OPCODES_base8  = {"01", "02", "03", "41", "42", "10", "11", "12", "13", "14", "15", "16", "17"};
+
     /** Creates a simulator instance with memory of size size
      * 
      * @param   size    the size of the memory for this simulated computer in 16-bit words
@@ -58,7 +65,8 @@ public class Simulator {
         this.CC = new int[4];
         this.IR = new int[16];
         this.MAR = new int[12];
-        this.MBR = new int[4];
+        this.MBR = new int[16];
+        this.MFR = new int[4];
         this.X1 = new int[16];
         this.X2 = new int[16];
         this.X3 = new int[16];
@@ -69,10 +77,6 @@ public class Simulator {
      * Performs a single step of machine execution: executing the instruction in the IR.
      */
     public void step() {
-        /*    
-        Decode the instruction in the IR
-        Execute the decoded instruction
-        */
         // Copy address from PC to MAR
         updateRegister("MAR", this.PC);
 
@@ -97,13 +101,77 @@ public class Simulator {
      */
     public void executeInstruction() {
         // Decode the instruction in the IR
-        int[] opcode = Arrays.copyOfRange(this.IR, 0, 6);
+        int[] opcode_array = Arrays.copyOfRange(this.IR, 0, 6);
         int[] R = Arrays.copyOfRange(this.IR, 6, 8);
         int[] IX = Arrays.copyOfRange(this.IR, 8, 10);
         int[] I = Arrays.copyOfRange(this.IR, 10, 11);
         int[] address = Arrays.copyOfRange(this.IR, 11, 16);
         
-        // Check that this is a valid opcode
+        // Get the opcode as an integer
+        int opcode = Utilities.bin2dec(opcode_array);
+
+        // Switch on the opcode
+        switch (opcode) {
+            case 1:
+                // LDR r, x, address[,I]
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 2:
+                // STR r, x, address[,I] 
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 3:
+                // LDA r, x, address[,I] 
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 33:
+                // LDX x, address[,I] 
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 34:
+                // STX x, address[,I] 
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 8:
+                // JZ r, x, address[,I]
+                /* Jump If Zero:
+                * If c(r) = 0, then PC  EA
+                * Else PC <- PC+1 
+                */
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 9:
+                // JNE r, x, address[,I] 
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 10:
+                // JCC cc, x, address[,I] 
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 11:
+                // JMA x, address[,I]
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 12:
+                // JSR x, address[,I] 
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 13:
+                // RFS Immed 
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 14:
+                // SOB r, x, address[,I] 
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            case 15:
+                // JGE r,x, address[,I]
+                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                break;
+            default:
+                // Invalid opcode (this opcode is not specified)
+                System.out.println("invalid opcode recieved: "+opcode+" in decimal");            
+        }
     }
 
     /**
@@ -200,16 +268,18 @@ public class Simulator {
                 return MAR;
             case "MBR":
                 return MBR;
+            case "MFR":
+                return MFR;
             case "X1":
                 return X1;
             case "X2":
                 return X2;
             case "X3":
-                return X3;
+                return X3; 
             default:
                 System.out.println("In the getRegister function in the Simulator class recieved string: "+name);
         }
-        int[] r = {0};
+        int[] r = {-1};
         return r;
     }
 
@@ -225,6 +295,7 @@ public class Simulator {
         for (int i = 0; i < this.PC.length; i++) {
             this.PC[i] = v[i];
         }
+        System.out.println(Arrays.toString(this.PC));
     }
 
     /**

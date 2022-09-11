@@ -63,19 +63,64 @@ public class Interface extends JFrame {
      * Adds other controls to the user interface like a "step" button. 
      */
     public void addControls() {
-        this.panel.add(new JButton("Load"));// loads from MAR address into MBR
+        // Create a single step button that executes the next instruction (and increments the PC, et cetera)
+        this.panel.add(createStepButton());
+
+        // Create a load button that loads into the MBR the value at the MAR address in memory
+        this.panel.add(createLoadButton());
+
+        this.panel.add(new JButton("Load"));
+
+        /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
-        this.panel.add(new JButton("IPL"));// init (allows you to choose file to load into memory)
-        this.panel.add(new JButton("Single Step")); // executes instruction at pc... 
+        this.panel.add(new JButton("IPL"));// init (allows you to choose file to load into memory) 
         this.panel.add(new JButton("Run"));// runs until a halt occurs
         this.panel.add(new JButton("Halt"));// indicates whether halted or not (not input)
         this.panel.add(new JButton("Privileged"));// for later phase
+        */
+    }
+    
+    /**
+     * Creates single step button for panel.
+     */
+    public JButton createStepButton() {
+        // Create the single step button
+        JButton button = new JButton("Single Step");
+
+        // Add an action listener that can call the simulator's step function upon this button being clicked
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                this.S.step();
+            }
+        });
+
+        // Return this button
+        return button;
+    }
+    
+    /**
+     * Creates load button for panel.
+     */
+    public JButton createLoadButton() {
+        // Create the single step button
+        JButton button = new JButton("Load");
+
+        // Add an action listener that can call the simulator's step function upon this button being clicked
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                this.S.load();
+            }
+        });
+
+        // Return this button
+        return button;
     }
 
     /**
      * Updates the display based on the values in the simulator S
      */
     public void updateDisplay() {
+        System.out.println("here");
         // Update registers
         for (int i = 0; i < this.registers.length; i++) {
             this.registers[i].update(this.S.getRegister(REG_NAMES[i]));
@@ -83,6 +128,26 @@ public class Interface extends JFrame {
 
         // Update other things... in the future
     }
+}
+
+/** 
+ * A simple action listener class for various buttons in the interface that has the simulator as a field so that actions can be responded to by calling simulator functions.
+ */
+class InterfaceActionListener implements ActionListener {
+    /** The simulator that this action listener will act upon. */
+    Simulator S;
+    /**
+     * A constructor for this action listener that takes a simulator S as input so that it can later act upon S as a consequence of actions
+     * @param S the simulator to be acted upon
+     */
+    public InterfaceActionListener(Simulator S) {
+        this.S = S;
+    }
+
+    /**
+     * Reacts to the performed action - to be implemented on a case-by-case basis
+     */
+    public void actionPerformed(ActionEvent e) {}   
 }
 
 /**
@@ -154,9 +219,18 @@ class Register {
                 return;
             }
         }
-        // Update the register's array
+        // Update this register's array
         for (int i = 0; i < this.arr.length; i++) {
             this.arr[i] = v[i];
+        }
+        // Update this register's buttons
+        for (int i = 0; i < this.buttons.length; i++) {
+            if (this.arr[i] == 0) {
+                this.buttons[i].setSelected(false);
+            } else {
+                System.out.println("hi");
+                this.buttons[i].setSelected(true);
+            }
         }
     }
 

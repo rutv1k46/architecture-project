@@ -27,11 +27,11 @@ public class Utilities {
      */
     public static int[] dec2bin(int a, int size) {
         int[] v = new int[size];
-        for (int i = size - 1; i >= 0; i --) {
-            if (a / 2 > 0) {
+        for (int i = 0; i < size; i++) {
+            if (a - Math.pow(2, size - 1 - i) >= 0) {
                 v[i] = 1;
-            } 
-            a -= a/2;
+                a -= Math.pow(2, size - 1 - i);
+            }
         }
         return v;
     }
