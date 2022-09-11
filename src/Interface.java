@@ -69,6 +69,7 @@ public class Interface extends JFrame {
      */
     public void updateDisplay() {
         // Update registers
+        
         // Update halt 
         // Update privileged
     }

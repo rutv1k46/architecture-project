@@ -16,4 +16,16 @@ public class Utilities {
         }
         return r;
     }
+
+    /**
+     * Converts a decimal number to binary (as an array of integers each zero or one).
+     * 
+     * @param a the decimal number to be converted
+     * @param size the number of desired bits in the converted binary number that gets returned
+     * 
+     * @return -1 if size is not sufficient to store the value of a and otherwise returns the converted-to-binary version as an int array of zeros and ones
+     */
+    public static int[] dec2bin(int a, int size) {
+        //TODO
+    }
 }
