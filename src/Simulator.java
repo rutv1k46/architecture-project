@@ -62,6 +62,20 @@ public class Simulator {
     }
 
     /**
+     * Performs a single step of machine execution: executing the instruction in the IR.
+     */
+    public void step() {
+        /*    
+        Copy address from the PC to the MAR
+        Increment PC
+        Load the MBR with the data from Memory[MAR]
+        Copy the MBR to the IR
+        Decode the instruction in the IR
+        Execute the decoded instruction
+        */
+    }
+
+    /**
      * Sets the register with name n to have the value v.
      * 
      * @param name the name of the register having its value set

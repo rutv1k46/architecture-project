@@ -55,7 +55,22 @@ public class Interface extends JFrame {
      * Adds other controls to the user interface like a "step" button. 
      */
     public void addControls() {
-        this.panel.add(new JButton("Step"));
+        this.panel.add(new JButton("Load"));// loads from MAR address into MBR
+        this.panel.add(new JButton("Store"));// stores MBR values at MAR address
+        this.panel.add(new JButton("IPL"));// init (allows you to choose file to load into memory)
+        this.panel.add(new JButton("Single Step")); // executes instruction at pc... 
+        this.panel.add(new JButton("Run"));// runs until a halt occurs
+        this.panel.add(new JButton("Halt"));// indicates whether halted or not (not input)
+        this.panel.add(new JButton("Privileged"));// for later phase
+    }
+
+    /**
+     * Updates the display based on the values in the simulator S
+     */
+    public void updateDisplay() {
+        // Update registers
+        // Update halt 
+        // Update privileged
     }
 }
 

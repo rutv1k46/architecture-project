@@ -12,7 +12,7 @@ public class Utilities {
     public static int bin2dec(int[] a) {
         int r = 0;
         for (int i = a.length - 1; i >= 0; i--) {
-            r += a[i] * 2^(a.length - 1 - i);
+            r += a[i] * Math.pow(2, (a.length - 1 - i));
         }
         return r;
     }
