@@ -1,5 +1,9 @@
 import javax.swing.*;
 import java.awt.event.*;
+import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.GridLayout;
 import javax.swing.border.EmptyBorder;
 
@@ -8,16 +12,33 @@ import javax.swing.border.EmptyBorder;
  */
 public class Interface extends JFrame {
     /** The main panel on which the interface is built. */
-    JPanel panel;
+    JPanel rPanel;
+    JPanel mPanel;
+    JPanel bPanel;
+    
+    // JPanel hPanel;
+
     /** A simulator for this interace to interact with and display. */
     Simulator S;
+    
     /** The names of the registers in the simulator (that are also displated on the interface). */
-    String[] REG_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR", "MAR", "MBR", "MFR", "X1", "X2", "X3"};
+    String[] REG_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR"};
+    String[] M_NAMES = {"MAR", "MBR", "MFR", "X1", "X2", "X3"};
+    
     /** The sizes of the registers in the simulator (that are also displated on the interface). */
-    int[] REG_SIZES = {16, 16, 16, 16, 12, 4, 16, 12, 16, 4, 16, 16, 16};
+    int[] REG_SIZES = {16, 16, 16, 16, 12, 4, 16};
+    int[] M_SIZES = { 12, 16, 4, 16, 16, 16};
+    
     /** An array of the register objects for the registers. */
     Register[] registers;
+    Register[] m;
 
+    // JTextField haultField = new JTextField(5);
+    // JLabel hault = new JLabel("Hault");
+
+    // JTextField runField = new JTextField(5);
+    // JLabel run = new JLabel("Run");
+    
     /**
      * Constructs and opens an interface with a simulator ready to run with all registers and memory intially set to zero.
      * 
@@ -27,23 +48,56 @@ public class Interface extends JFrame {
         // Make a graphical user interface frame for this interface
         this.setTitle("LOR Simulator");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        int w = 800;
-        int h = 600;
+        int w = 1920;
+        int h = 1080;
         this.setSize(w,h);
-        this.panel = new JPanel(new GridLayout(20,1));
-        this.add(this.panel);
+        this.getContentPane().setBackground(new Color(40, 40, 40));
+        // this.panel = new JPanel(new GridLayout(20,1));
+        rPanel = new JPanel(new GridLayout(10, 1, 5, 5));
+        // rPanel.setLayout(new GridLayout(10, 1, 5, 5));
+        // rPanel.setBackground(new Color(40, 40, 40));
+        // rPanel.setLayout(new BoxLayout(rPanel, BoxLayout.Y_AXIS));
+
+        mPanel = new JPanel(new GridLayout(10, 1, 5, 5));
+        // mPanel.setBackground(new Color(40, 40, 40));
+
+        bPanel = new JPanel();
+        // bPanel.setBackground(new Color(40, 40, 40));
+        // bPanel.setLayout(new BoxLayout(bPanel, BoxLayout.X_AXIS));
+
+        // hPanel = new JPanel();
+        // hPanel.add(haultField);
+        // hPanel.add(hault);
+        // hPanel.add(runField);
+        // hPanel.add(run);
+
+        this.setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
+        this.add(rPanel);
+        this.add(mPanel);
+        // this.add(bPanel, BorderLayout.SOUTH);
+        // this.add(rPanel, BorderLayout.WEST);
+        // this.add(mPanel, BorderLayout.EAST);
+        // this.add(bPanel, BorderLayout.SOUTH);
 
         // Set the simulator instance for this interface
         this.S = S;
 
         // Create registers
-        registers = addRegisters();
+        registers = addRegisters(this.S, rPanel, REG_NAMES, REG_SIZES);
+        m = addRegisters(this.S, mPanel, M_NAMES, M_SIZES);
 
         // Create controls
-        addControls();
+        addControls(bPanel);
+
+        // bPanel.add(haultField, BoxLayout.Y_AXIS);
+        // bPanel.add(hault);
+
+        mPanel.add(bPanel);
+        // mPanel.add(hPanel);
 
         // Set visibile
         this.setVisible(true);
+        pack();
     }
 
     /**
@@ -51,26 +105,35 @@ public class Interface extends JFrame {
      * 
      * @return an array of the register objects that get created and added to the interface
      */
-    public Register[] addRegisters() {
+    public Register[] addRegisters(Simulator S, JPanel panel, String[] REG_NAMES, int[] REG_SIZES) {
         Register[] registers = new Register[REG_NAMES.length];
         for (int i = 0; i < REG_NAMES.length; i++) {
-            registers[i] = new Register(this.S, this.panel, REG_NAMES[i], REG_SIZES[i]);
+            registers[i] = new Register(S, panel, REG_NAMES[i], REG_SIZES[i]);
         }
         return registers;
     }
+    // public Register[] addRegisters() {
+    //     Register[] registers = new Register[REG_NAMES.length];
+    //     for (int i = 0; i < REG_NAMES.length; i++) {
+    //         registers[i] = new Register(this.S, this.panel, REG_NAMES[i], REG_SIZES[i]);
+    //     }
+    //     return registers;
+    // }
 
     /**
      * Adds other controls to the user interface like a "step" button. 
      */
-    public void addControls() {
+    public void addControls(JPanel panel) {
         // Create a single step button that executes the next instruction (and increments the PC, et cetera)
-        this.panel.add(createStepButton());
+        panel.add(createStepButton());
 
         // Create a load button that loads into the MBR the value at the MAR address in memory
-        this.panel.add(createLoadButton());
+        panel.add(createLoadButton());
 
         // Create a store button that stores into the memory at address MAR the value in MBR
-        this.panel.add(createStoreButton());
+        panel.add(createStoreButton());
+        
+        panel.add(createInitButton());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -80,6 +143,24 @@ public class Interface extends JFrame {
         this.panel.add(new JButton("Privileged"));// for later phase
         */
     }
+    // public void addControls() {
+    //     // Create a single step button that executes the next instruction (and increments the PC, et cetera)
+    //     this.panel.add(createStepButton());
+
+    //     // Create a load button that loads into the MBR the value at the MAR address in memory
+    //     this.panel.add(createLoadButton());
+
+    //     // Create a store button that stores into the memory at address MAR the value in MBR
+    //     this.panel.add(createStoreButton());
+
+    //     /*
+    //     this.panel.add(new JButton("Store"));// stores MBR values at MAR address
+    //     this.panel.add(new JButton("IPL"));// init (allows you to choose file to load into memory) 
+    //     this.panel.add(new JButton("Run"));// runs until a halt occurs
+    //     this.panel.add(new JButton("Halt"));// indicates whether halted or not (not input)
+    //     this.panel.add(new JButton("Privileged"));// for later phase
+    //     */
+    // }
     
     /**
      * Creates single step button for panel.
@@ -87,6 +168,8 @@ public class Interface extends JFrame {
     public JButton createStepButton() {
         // Create the single step button
         JButton button = new JButton("Single Step");
+        button.setPreferredSize((new Dimension(100,50)));
+        button.setFocusable(false);
 
         // Add an action listener that can call the simulator's step function upon this button being clicked
         button.addActionListener(new InterfaceActionListener(this.S) {
@@ -98,6 +181,23 @@ public class Interface extends JFrame {
         // Return this button
         return button;
     }
+    public JButton createInitButton() {
+        // Create the single step button
+        JButton button = new JButton("Init");
+        button.setForeground(Color.RED);
+        button.setPreferredSize((new Dimension(100,50)));
+        button.setFocusable(false);
+
+
+        // // Add an action listener that can call the simulator's step function upon this button being clicked
+        // button.addActionListener(new InterfaceActionListener(this.S) {
+        //     public void actionPerformed(ActionEvent e) {
+        //     }
+        // });
+
+        // Return this button
+        return button;
+    }
     
     /**
      * Creates load button for panel.
@@ -105,6 +205,9 @@ public class Interface extends JFrame {
     public JButton createLoadButton() {
         // Create the load button
         JButton button = new JButton("Load");
+        button.setPreferredSize((new Dimension(100,50)));
+        button.setFocusable(false);
+
 
         // Add an action listener that can call the simulator's load function upon this button being clicked
         button.addActionListener(new InterfaceActionListener(this.S) {
@@ -123,6 +226,9 @@ public class Interface extends JFrame {
     public JButton createStoreButton() {
         // Create the store button
         JButton button = new JButton("Store");
+        button.setPreferredSize((new Dimension(100,50)));
+        button.setFocusable(false);
+
 
         // Add an action listener that can call the simulator's store function upon this button being clicked
         button.addActionListener(new InterfaceActionListener(this.S) {
@@ -179,6 +285,10 @@ class Register {
     /** The name of this register. */
     String name;
 
+
+    ImageIcon lit = new ImageIcon("icons/blue-24.png");
+    ImageIcon unlit = new ImageIcon("icons/grey-24.png");
+
     /** 
      * Creates a register for the simulator S on interface panel panel with name name and size size (number of bits).
      * 
@@ -191,29 +301,79 @@ class Register {
         this.name = name;
         buttons = new JRadioButton[size];
         arr = new int[size];
+
+        JLabel nam = new JLabel(name);
+        nam.setFont(new Font("Calibri", Font.BOLD, 16));
+        // nam.setForeground(Color.WHITE);
+
         Box box = new Box(BoxLayout.X_AXIS);
-        box.add(new JLabel(name));
+        box.add(nam);
+        // box.add(new JLabel(name));
         if (name.equals("IR")) {
             for (int i = 0; i < size; i++) {
                 if (i == 6 || i == 8 || i == 10 || i == 11) {
-                    box.add(new JLabel("|"));
+                    JLabel l = new JLabel("|");
+                    l.setFont(new Font("Calibri", Font.BOLD, 18));
+                    // l.setForeground(Color.WHITE);
+                    l.setBorder(new EmptyBorder(0, 15, 0, 0));
+                    box.add(l);
+                    // box.add(new JLabel("|"));
                 }
                 buttons[i] = new JRadioButton();
-                buttons[i].setBorder(new EmptyBorder(0,0,0,0));
+                buttons[i].setBorder(new EmptyBorder(0, 15, 0, 0));
                 buttons[i].addActionListener(new RegisterListener(S, this, i));
+                buttons[i].setIcon(unlit);
+                buttons[i].setSelectedIcon(lit);
+                buttons[i].setFocusable(false);
+
                 box.add(buttons[i]);
             }
             panel.add(box);
             Box labelBox = new Box(BoxLayout.X_AXIS);
-            String l = "           Opcode            R        IX     I        Address";
-            labelBox.add(new JLabel(l));
+            
+            JLabel opcodeLabel = new JLabel("Opcode");
+            opcodeLabel.setFont(new Font("Calibri", Font.BOLD, 16));
+            // opcodeLabel.setForeground(Color.WHITE);
+
+            JLabel rLabel = new JLabel("R");
+            rLabel.setFont(new Font("Calibri", Font.BOLD, 16));
+            // rLabel.setForeground(Color.WHITE);
+
+            JLabel ixLabel = new JLabel("IX");
+            ixLabel.setFont(new Font("Calibri", Font.BOLD, 16));
+            // ixLabel.setForeground(Color.WHITE);
+
+            JLabel iLabel = new JLabel("I");
+            iLabel.setFont(new Font("Calibri", Font.BOLD, 16));
+            // iLabel.setForeground(Color.WHITE);
+
+            JLabel addressLabel = new JLabel("Address");
+            addressLabel.setFont(new Font("Calibri", Font.BOLD, 16));
+            // addressLabel.setForeground(Color.WHITE);
+
+            opcodeLabel.setBorder(new EmptyBorder(0, 110, 0, 0));
+            rLabel.setBorder(new EmptyBorder(0, 140, 0, 0));
+            ixLabel.setBorder(new EmptyBorder(0, 90, 0, 0));
+            iLabel.setBorder(new EmptyBorder(0, 70, 0, 0));
+            addressLabel.setBorder(new EmptyBorder(0, 95, 0, 0));
+
+            labelBox.add(opcodeLabel);
+            labelBox.add(rLabel);
+            labelBox.add(ixLabel);
+            labelBox.add(iLabel);
+            labelBox.add(addressLabel);
+            // String l = "           Opcode            R        IX     I        Address";
+            // labelBox.add(new JLabel(l));
             panel.add(labelBox);
             return;
         }
         for (int i = 0; i < size; i++) {
             buttons[i] = new JRadioButton();
-            buttons[i].setBorder(new EmptyBorder(0,0,0,0));
+            buttons[i].setBorder(new EmptyBorder(0, 15, 0, 0));
             buttons[i].addActionListener(new RegisterListener(S, this, i));
+            buttons[i].setIcon(unlit);
+            buttons[i].setSelectedIcon(lit);
+            buttons[i].setFocusable(false);
             box.add(buttons[i]);
         }
         panel.add(box);
@@ -245,6 +405,7 @@ class Register {
         for (int i = 0; i < this.buttons.length; i++) {
             if (this.arr[i] == 0) {
                 this.buttons[i].setSelected(false);
+                
             } else {
                 this.buttons[i].setSelected(true);
             }
