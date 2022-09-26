@@ -35,4 +35,10 @@ public class Utilities {
         }
         return v;
     }
+    public static int[] hex2bin(String hex, int size){
+        int d = Integer.parseInt(hex, 16);
+        return dec2bin(d, size);
+            // return new BigInteger(hex, 16).toString(2);
+          
+    }
 }

@@ -1,33 +1,33 @@
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import javax.swing.border.EmptyBorder;
-
 /**
  * A graphical user interface for using the simulated computer
  */
 public class Interface extends JFrame {
     /** The main panel on which the interface is built. */
+    /** The different panels which makes up the JFrame for the graphical user interface. */
     JPanel rPanel;
     JPanel mPanel;
-    JPanel bPanel;
-    
+    JPanel bPanel;    
     // JPanel hPanel;
 
     /** A simulator for this interace to interact with and display. */
     Simulator S;
     
     /** The names of the registers in the simulator (that are also displated on the interface). */
-    String[] REG_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR"};
+    String[] REG_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR", "MAR", "MBR", "MFR", "X1", "X2", "X3"};
+    String[] R_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR"};
     String[] M_NAMES = {"MAR", "MBR", "MFR", "X1", "X2", "X3"};
     
     /** The sizes of the registers in the simulator (that are also displated on the interface). */
-    int[] REG_SIZES = {16, 16, 16, 16, 12, 4, 16};
-    int[] M_SIZES = { 12, 16, 4, 16, 16, 16};
+    int[] REG_SIZES = {16, 16, 16, 16, 12, 4, 16, 12, 16, 4, 16, 16, 16};
+    int[] R_SIZES = {16, 16, 16, 16, 12, 4, 16};
+    int[] M_SIZES = {12, 16, 4, 16, 16, 16};
     
     /** An array of the register objects for the registers. */
     Register[] registers;
@@ -52,18 +52,15 @@ public class Interface extends JFrame {
         int h = 1080;
         this.setSize(w,h);
         this.getContentPane().setBackground(new Color(40, 40, 40));
-        // this.panel = new JPanel(new GridLayout(20,1));
+
         rPanel = new JPanel(new GridLayout(10, 1, 5, 5));
-        // rPanel.setLayout(new GridLayout(10, 1, 5, 5));
         // rPanel.setBackground(new Color(40, 40, 40));
-        // rPanel.setLayout(new BoxLayout(rPanel, BoxLayout.Y_AXIS));
 
         mPanel = new JPanel(new GridLayout(10, 1, 5, 5));
         // mPanel.setBackground(new Color(40, 40, 40));
 
         bPanel = new JPanel();
         // bPanel.setBackground(new Color(40, 40, 40));
-        // bPanel.setLayout(new BoxLayout(bPanel, BoxLayout.X_AXIS));
 
         // hPanel = new JPanel();
         // hPanel.add(haultField);
@@ -74,16 +71,12 @@ public class Interface extends JFrame {
         this.setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
         this.add(rPanel);
         this.add(mPanel);
-        // this.add(bPanel, BorderLayout.SOUTH);
-        // this.add(rPanel, BorderLayout.WEST);
-        // this.add(mPanel, BorderLayout.EAST);
-        // this.add(bPanel, BorderLayout.SOUTH);
-
+       
         // Set the simulator instance for this interface
         this.S = S;
 
         // Create registers
-        registers = addRegisters(this.S, rPanel, REG_NAMES, REG_SIZES);
+        registers = addRegisters(this.S, rPanel, R_NAMES, REG_SIZES);
         m = addRegisters(this.S, mPanel, M_NAMES, M_SIZES);
 
         // Create controls
@@ -112,13 +105,6 @@ public class Interface extends JFrame {
         }
         return registers;
     }
-    // public Register[] addRegisters() {
-    //     Register[] registers = new Register[REG_NAMES.length];
-    //     for (int i = 0; i < REG_NAMES.length; i++) {
-    //         registers[i] = new Register(this.S, this.panel, REG_NAMES[i], REG_SIZES[i]);
-    //     }
-    //     return registers;
-    // }
 
     /**
      * Adds other controls to the user interface like a "step" button. 
@@ -143,24 +129,6 @@ public class Interface extends JFrame {
         this.panel.add(new JButton("Privileged"));// for later phase
         */
     }
-    // public void addControls() {
-    //     // Create a single step button that executes the next instruction (and increments the PC, et cetera)
-    //     this.panel.add(createStepButton());
-
-    //     // Create a load button that loads into the MBR the value at the MAR address in memory
-    //     this.panel.add(createLoadButton());
-
-    //     // Create a store button that stores into the memory at address MAR the value in MBR
-    //     this.panel.add(createStoreButton());
-
-    //     /*
-    //     this.panel.add(new JButton("Store"));// stores MBR values at MAR address
-    //     this.panel.add(new JButton("IPL"));// init (allows you to choose file to load into memory) 
-    //     this.panel.add(new JButton("Run"));// runs until a halt occurs
-    //     this.panel.add(new JButton("Halt"));// indicates whether halted or not (not input)
-    //     this.panel.add(new JButton("Privileged"));// for later phase
-    //     */
-    // }
     
     /**
      * Creates single step button for panel.
@@ -190,10 +158,11 @@ public class Interface extends JFrame {
 
 
         // // Add an action listener that can call the simulator's step function upon this button being clicked
-        // button.addActionListener(new InterfaceActionListener(this.S) {
-        //     public void actionPerformed(ActionEvent e) {
-        //     }
-        // });
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                this.S.init();
+            }
+        });
 
         // Return this button
         return button;
@@ -285,7 +254,7 @@ class Register {
     /** The name of this register. */
     String name;
 
-
+    /** ImageIcons for the radio buttons to simulate the selected and not-selected state  */
     ImageIcon lit = new ImageIcon("icons/blue-24.png");
     ImageIcon unlit = new ImageIcon("icons/grey-24.png");
 
@@ -458,8 +427,10 @@ class RegisterListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         // Update this register's value in the register object
         if (this.R.arr[i] == 0) {
+            this.S.IR[i] = 1;
             this.R.arr[i] = 1;
         } else {
+            this.S.IR[i] = 0;
             this.R.arr[i] = 0;
         }
         // Update this register's value in the simulator
