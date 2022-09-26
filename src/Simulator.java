@@ -293,26 +293,7 @@ public class Simulator {
                 }           
                 in.close();
             }
-            // FileInputStream fstream = new FileInputStream("Input.txt");
-            // DataInputStream in = new DataInputStream(fstream);
-            // BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            // String strLine;
-            // // int[] mar = new int[12];
-            // int[] mbr = new int[16];
-
-            // while ((strLine = br.readLine()) != null)   {
-            //     String[] tokens = strLine.split(" ");
-
-            //     mbr = Utilities.hex2bin(tokens[1], 16);
-            //     this.M.set(Integer.parseInt(tokens[0], 16), mbr);
-
-            //     // Notify the interface that changes may have been made
-            //     this.I.updateDisplay();
-            // }           
-            // in.close();
-
-
-            } catch (Exception err){
+        }catch (Exception err){
               System.err.println("Error: " + err.getMessage());
             }
     }
