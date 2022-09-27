@@ -14,7 +14,7 @@ public class Interface extends JFrame {
     JPanel rPanel;
     JPanel mPanel;
     JPanel bPanel;    
-    // JPanel hPanel;
+    JPanel hPanel;
 
     /** A simulator for this interace to interact with and display. */
     Simulator S;
@@ -62,7 +62,7 @@ public class Interface extends JFrame {
         bPanel = new JPanel();
         // bPanel.setBackground(new Color(40, 40, 40));
 
-        // hPanel = new JPanel();
+        hPanel = new JPanel();
         // hPanel.add(haultField);
         // hPanel.add(hault);
         // hPanel.add(runField);
@@ -80,13 +80,13 @@ public class Interface extends JFrame {
         m = addRegisters(this.S, mPanel, M_NAMES, M_SIZES);
 
         // Create controls
-        addControls(bPanel);
+        addControls(bPanel, hPanel);
 
         // bPanel.add(haultField, BoxLayout.Y_AXIS);
         // bPanel.add(hault);
 
         mPanel.add(bPanel);
-        // mPanel.add(hPanel);
+        mPanel.add(hPanel);
 
         // Set visibile
         this.setVisible(true);
@@ -109,7 +109,7 @@ public class Interface extends JFrame {
     /**
      * Adds other controls to the user interface like a "step" button. 
      */
-    public void addControls(JPanel panel) {
+    public void addControls(JPanel panel, JPanel hJPanel) {
         // Create a single step button that executes the next instruction (and increments the PC, et cetera)
         panel.add(createStepButton());
 
@@ -119,7 +119,11 @@ public class Interface extends JFrame {
         // Create a store button that stores into the memory at address MAR the value in MBR
         panel.add(createStoreButton());
         
+        // Create a store button that stores into the memory at address MAR the value in MBR
         panel.add(createInitButton());
+
+        // Create a store button that stores into the memory at address MAR the value in MBR
+        hJPanel.add(createRunButton());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -149,8 +153,32 @@ public class Interface extends JFrame {
         // Return this button
         return button;
     }
-    public JButton createInitButton() {
+
+    /**
+     * Creates run button for panel.
+     */
+    public JButton createRunButton() {
         // Create the single step button
+        JButton button = new JButton("Run");
+        button.setPreferredSize((new Dimension(100,50)));
+        button.setFocusable(false);
+
+        // Add an action listener that can call the simulator's step function upon this button being clicked
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                // this.S.run();
+            }
+        });
+
+        // Return this button
+        return button;
+    }
+
+    /**
+     * Creates init button for panel.
+     */
+    public JButton createInitButton() {
+        // Create the init button
         JButton button = new JButton("Init");
         button.setForeground(Color.RED);
         button.setPreferredSize((new Dimension(100,50)));
@@ -255,8 +283,8 @@ class Register {
     String name;
 
     /** ImageIcons for the radio buttons to simulate the selected and not-selected state  */
-    ImageIcon lit = new ImageIcon("icons/blue-24.png");
-    ImageIcon unlit = new ImageIcon("icons/grey-24.png");
+    ImageIcon lit = new ImageIcon((getClass().getResource("icons/blue-24.png")));
+    ImageIcon unlit = new ImageIcon(getClass().getResource("icons/grey-24.png"));
 
     /** 
      * Creates a register for the simulator S on interface panel panel with name name and size size (number of bits).

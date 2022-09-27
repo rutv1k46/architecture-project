@@ -127,8 +127,9 @@ public class Simulator {
                 // LDR r, x, address[,I]
                 // System.out.println("opcode "+opcode+" was given but is not yet implemented");
                 break;
-            case 2:
+                case 2:
                 // STR r, x, address[,I] 
+                executeSTR(R, IX, I, address);
                 System.out.println("opcode "+opcode+" was given but is not yet implemented");
                 break;
             case 3:
@@ -186,61 +187,112 @@ public class Simulator {
     }
 
     private void executeLDR(int[] R, int[] IX, int[] I, int[] address) {
-		
-    	//Where is this calculation performed? Should we use any specific register
-    	int effectiveAddress = 0;
-    	
-    	int indexingRegister = Utilities.bin2dec(IX);
-    	// System.out.println(indexingRegister);
-    	switch (indexingRegister) {
-			case 0: 
-				break;
-			case 1:
-				effectiveAddress += Utilities.bin2dec(this.X1);
-				break;
-			case 2:
-				effectiveAddress += Utilities.bin2dec(this.X2);
-				break;
-			case 3:
-				effectiveAddress += Utilities.bin2dec(this.X3);
-			default:
-				System.out.println("Unkown indexing register passed");
+
+		// calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		int indexingRegister = Utilities.bin2dec(IX);
+		switch (indexingRegister) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
 		}
-    	
-    	if(I[0] == 1) {
-    		// access data present at effectiveAddress in memory
-    		// then that data to the effectiveAddress to have final effectiveAddress
-    		//the above 2 steps are called indirect addressing
-    		
-    		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
-    		load();
-    		effectiveAddress += Utilities.bin2dec(this.MBR);
-    	}
-    		effectiveAddress += Utilities.bin2dec(address);
-    		// System.out.println(effectiveAddress);
-    	updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //copies EA to MAR
-		load(); //copies contents in address of MAR to MBR
-		this.MBR=Utilities.dec2bin(5, 16);
+
+		// indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress += Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		load(); // copies contents in address of MAR to MBR
+
 		int targetRegister = Utilities.bin2dec(R);
+
 		switch (targetRegister) {
-			case 0:
-				registerCopy(this.MBR, this.R0);
-				break;
-			case 1:
-				registerCopy(this.MBR, this.R1);
-				break;
-			case 2:
-				registerCopy(this.MBR, this.R2);
-				break;
-			case 3:
-				registerCopy(this.MBR, this.R3);
-				break;
-	
-			default:
-				break;
+		case 0:
+			registerCopy(this.MBR, this.R0);
+			break;
+		case 1:
+			registerCopy(this.MBR, this.R1);
+			break;
+		case 2:
+			registerCopy(this.MBR, this.R2);
+			break;
+		case 3:
+			registerCopy(this.MBR, this.R3);
+			break;
+		default:
+			System.out.println("Unkown target register passed in LDR instruction");
+			break;
 		}
-		// System.out.println(Arrays.toString(this.R2));
-		 this.I.updateDisplay();
+	}
+
+	private void executeSTR(int[] R, int[] IX, int[] I, int[] address) {
+		// TODO Auto-generated method stub
+		// calculating effective address
+		int effectiveAddress = 0;
+		// copying contents of IR to EA
+		int indexingRegister = Utilities.bin2dec(IX);
+		switch (indexingRegister) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+		}
+		// c(addressField)
+		effectiveAddress += Utilities.bin2dec(address);// c(ir)+c(address)
+		// indirect addressing
+		// ea=c(c(iX)+c(addressField))
+
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);// c(c(ir)+c(addressField))
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); // copies EA to MAR
+
+		int register = Utilities.bin2dec(R);
+		System.out.println(Arrays.toString(this.R3));
+		switch (register) {
+		case 0:
+			registerCopy(this.R0, this.MBR);
+			break;
+		case 1:
+			registerCopy(this.R1, this.MBR);
+			break;
+		case 2:
+			registerCopy(this.R2, this.MBR);
+			break;
+		case 3:
+			registerCopy(this.R3, this.MBR);
+			break;
+
+		default:
+			break;
+		}
+		store();
+		this.I.updateDisplay();
 	}
 
     /**
@@ -251,7 +303,6 @@ public class Simulator {
         for (int i = 0; i < this.MBR.length; i++) {
             this.MBR[i] = v[i];
         }
-        // System.out.println("this.mbr -- "+Arrays.toString(this.MBR));
         // Notify the interface that changes may have been made
         this.I.updateDisplay();
     }
@@ -292,6 +343,46 @@ public class Simulator {
                     this.I.updateDisplay();
                 }           
                 in.close();
+                System.out.println(this.M);
+            }
+        }catch (Exception err){
+              System.err.println("Error: " + err.getMessage());
+            }
+    }
+    /**
+     * allows you to choose file to load into memory.
+     */
+    public void run() {
+        String[] reg = {"R0", "R1", "R2", "R3"}; 
+        try{
+            JFileChooser fileChooser = new JFileChooser();
+            int returnValue = fileChooser.showOpenDialog(null);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
+                FileInputStream fstream = new FileInputStream(selectedFile);
+                DataInputStream in = new DataInputStream(fstream);
+                BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                String strLine;
+                // int[] mar = new int[12];
+                int[] mbr = new int[16];
+                int index = 0;
+
+                while ((strLine = br.readLine()) != null) {
+                    if(index < reg.length){
+                        String[] tokens = strLine.split(" ");
+    
+                        // mar = Utilities.hex2bin(tokens[0], 12);
+                        mbr = Utilities.hex2bin(tokens[1], 16);
+                        this.M.set(Integer.parseInt(tokens[0], 16), mbr);
+                        updateRegister(reg[index], mbr);
+                        index += 1;
+                    }
+
+                    // Notify the interface that changes may have been made
+                    this.I.updateDisplay();
+                }           
+                in.close();
+                System.out.println(this.M);
             }
         }catch (Exception err){
               System.err.println("Error: " + err.getMessage());
