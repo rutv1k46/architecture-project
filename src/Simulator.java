@@ -48,6 +48,9 @@ public class Simulator {
     /** Main memory. */
     Memory M;
 
+    int[] ma = new int[12];
+    int lines = 0;
+
     /** An interface that is notified when the state of this simulated machine changes. */
     Interface I;
 
@@ -82,19 +85,19 @@ public class Simulator {
      * Performs a single step of machine execution: executing the instruction in the IR.
      */
     public void step() {
-        // // Copy address from PC to MAR
+        // Copy address from PC to MAR
         updateRegister("MAR", this.PC);
         
-        // // Increment PC
+        // Increment PC
         incrementPC();
         
-        // // Load the MBR with the data from memory at the address specified by the contents of MAR
+        // Load the MBR with the data from memory at the address specified by the contents of MAR
         load();
         
-        // // Copy MBR to IR
+        // Copy MBR to IR
         registerCopy(this.MBR, this.IR);
         
-        // // Execute the instruction now in the IR
+        // Execute the instruction now in the IR
         executeInstruction();
 
         // Notify the interface that changes may have occured
@@ -213,11 +216,12 @@ public class Simulator {
 		if (I[0] == 1) {
 			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
 			load();// mbr has c(c(ir)+c(addressField))
-			effectiveAddress += Utilities.bin2dec(this.MBR);
+			effectiveAddress = Utilities.bin2dec(this.MBR);
 		}
 		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		// this.I.updateDisplay();
 		load(); // copies contents in address of MAR to MBR
-
+		this.I.updateDisplay();
 		int targetRegister = Utilities.bin2dec(R);
 
 		switch (targetRegister) {
@@ -329,18 +333,18 @@ public class Simulator {
                 DataInputStream in = new DataInputStream(fstream);
                 BufferedReader br = new BufferedReader(new InputStreamReader(in));
                 String strLine;
-                // int[] mar = new int[12];
                 int[] mbr = new int[16];
+                int count = 0; 
 
                 while ((strLine = br.readLine()) != null)   {
                     String[] tokens = strLine.split(" ");
 
-                    // mar = Utilities.hex2bin(tokens[0], 12);
                     mbr = Utilities.hex2bin(tokens[1], 16);
+                    ma[count] = Integer.parseInt(tokens[0], 16);
+                    count += 1;
+                    lines += 1;
+                    
                     this.M.set(Integer.parseInt(tokens[0], 16), mbr);
-
-                    // Notify the interface that changes may have been made
-                    this.I.updateDisplay();
                 }           
                 in.close();
                 System.out.println(this.M);
@@ -353,40 +357,12 @@ public class Simulator {
      * allows you to choose file to load into memory.
      */
     public void run() {
-        String[] reg = {"R0", "R1", "R2", "R3"}; 
-        try{
-            JFileChooser fileChooser = new JFileChooser();
-            int returnValue = fileChooser.showOpenDialog(null);
-            if (returnValue == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
-                FileInputStream fstream = new FileInputStream(selectedFile);
-                DataInputStream in = new DataInputStream(fstream);
-                BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                String strLine;
-                // int[] mar = new int[12];
-                int[] mbr = new int[16];
-                int index = 0;
-
-                while ((strLine = br.readLine()) != null) {
-                    if(index < reg.length){
-                        String[] tokens = strLine.split(" ");
-    
-                        // mar = Utilities.hex2bin(tokens[0], 12);
-                        mbr = Utilities.hex2bin(tokens[1], 16);
-                        this.M.set(Integer.parseInt(tokens[0], 16), mbr);
-                        updateRegister(reg[index], mbr);
-                        index += 1;
-                    }
-
-                    // Notify the interface that changes may have been made
-                    this.I.updateDisplay();
-                }           
-                in.close();
-                System.out.println(this.M);
-            }
-        }catch (Exception err){
-              System.err.println("Error: " + err.getMessage());
-            }
+        String[] reg = {"R0", "R1", "R2", "R3", "X1", "X2", "X3"};
+        for (int i = 0; i < reg.length; i++) {
+            updateRegister(reg[i], this.M.get(ma[i]));
+        }
+        incrementPC();
+        this.I.updateDisplay();
     }
 
     /**
@@ -431,7 +407,6 @@ public class Simulator {
                 break;
             case "MBR":
                 for (int i=0; i<this.MBR.length; i++) this.MBR[i] = v[i];
-
                 break;
             case "X1":
                 for (int i=0; i<this.X1.length; i++) this.X1[i] = v[i];

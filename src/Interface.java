@@ -69,8 +69,6 @@ public class Interface extends JFrame {
         // hPanel.add(run);
 
         this.setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
-        this.add(rPanel);
-        this.add(mPanel);
        
         // Set the simulator instance for this interface
         this.S = S;
@@ -88,6 +86,12 @@ public class Interface extends JFrame {
         mPanel.add(bPanel);
         mPanel.add(hPanel);
 
+        
+        this.add(rPanel);
+        this.add(mPanel);
+        
+        this.revalidate();
+        this.repaint();
         // Set visibile
         this.setVisible(true);
         pack();
@@ -166,7 +170,7 @@ public class Interface extends JFrame {
         // Add an action listener that can call the simulator's step function upon this button being clicked
         button.addActionListener(new InterfaceActionListener(this.S) {
             public void actionPerformed(ActionEvent e) {
-                // this.S.run();
+                this.S.run();
             }
         });
 
@@ -247,6 +251,10 @@ public class Interface extends JFrame {
             this.registers[i].update(this.S.getRegister(REG_NAMES[i]));
         }
 
+        for (int i = 0; i < this.m.length; i++) {
+            this.m[i].update(this.S.getRegister(M_NAMES[i]));
+        }
+
         // Update other things... in the future
     }
 }
@@ -294,6 +302,7 @@ class Register {
      * @param name the name of this register
      * @param size the number of bits in this register
      */
+
     public Register(Simulator S, JPanel panel, String name, int size) {
         this.name = name;
         buttons = new JRadioButton[size];
