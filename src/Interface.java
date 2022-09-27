@@ -33,11 +33,6 @@ public class Interface extends JFrame {
     Register[] registers;
     Register[] m;
 
-    // JTextField haultField = new JTextField(5);
-    // JLabel hault = new JLabel("Hault");
-
-    // JTextField runField = new JTextField(5);
-    // JLabel run = new JLabel("Run");
     
     /**
      * Constructs and opens an interface with a simulator ready to run with all registers and memory intially set to zero.
@@ -63,10 +58,7 @@ public class Interface extends JFrame {
         // bPanel.setBackground(new Color(40, 40, 40));
 
         hPanel = new JPanel();
-        // hPanel.add(haultField);
-        // hPanel.add(hault);
-        // hPanel.add(runField);
-        // hPanel.add(run);
+
 
         this.setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
        
@@ -80,8 +72,6 @@ public class Interface extends JFrame {
         // Create controls
         addControls(bPanel, hPanel);
 
-        // bPanel.add(haultField, BoxLayout.Y_AXIS);
-        // bPanel.add(hault);
 
         mPanel.add(bPanel);
         mPanel.add(hPanel);
@@ -89,9 +79,7 @@ public class Interface extends JFrame {
         
         this.add(rPanel);
         this.add(mPanel);
-        
-        this.revalidate();
-        this.repaint();
+
         // Set visibile
         this.setVisible(true);
         pack();
