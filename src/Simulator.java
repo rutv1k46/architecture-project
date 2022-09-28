@@ -1,4 +1,7 @@
 import java.util.Arrays;
+import java.io.*;
+import javax.swing.*;
+
 /**
  * The main class that simulates the operations of the computer
  */
@@ -45,12 +48,17 @@ public class Simulator {
     /** Main memory. */
     Memory M;
 
+    int[] ma = new int[12];
+    int lines = 0;
+
     /** An interface that is notified when the state of this simulated machine changes. */
     Interface I;
 
     /** Constant array of the valid opcodes as decimal integers. */
     int[] OPCODES           = {   1,    2,    3,   33,   34,   8,    9,   10,   11,   12,   13,   14,   15};
     String[] OPCODES_base8  = {"01", "02", "03", "41", "42", "10", "11", "12", "13", "14", "15", "16", "17"};
+
+    int click =0;
 
     /** Creates a simulator instance with memory of size size
      * 
@@ -79,16 +87,16 @@ public class Simulator {
     public void step() {
         // Copy address from PC to MAR
         updateRegister("MAR", this.PC);
-
+        
         // Increment PC
         incrementPC();
-
+        
         // Load the MBR with the data from memory at the address specified by the contents of MAR
         load();
-
+        
         // Copy MBR to IR
         registerCopy(this.MBR, this.IR);
-
+        
         // Execute the instruction now in the IR
         executeInstruction();
 
@@ -112,16 +120,16 @@ public class Simulator {
         
         // Get the opcode as an integer
         int opcode = Utilities.bin2dec(opcode_array);
-
+        // opcode = 1;
         // Switch on the opcode
         switch (opcode) {
-            case 1:
+            case 1:               
                 // LDR r, x, address[,I]
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                executeLDR(R, IX, I, address);
                 break;
             case 2:
                 // STR r, x, address[,I] 
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                executeSTR(R, IX, I, address);
                 break;
             case 3:
                 // LDA r, x, address[,I] 
@@ -177,6 +185,115 @@ public class Simulator {
         }
     }
 
+    private void executeLDR(int[] R, int[] IX, int[] I, int[] address) {
+
+		// calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		int indexingRegister = Utilities.bin2dec(IX);
+		switch (indexingRegister) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+		}
+
+		// indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		// this.I.updateDisplay();
+		load(); // copies contents in address of MAR to MBR
+		this.I.updateDisplay();
+		int targetRegister = Utilities.bin2dec(R);
+
+		switch (targetRegister) {
+		case 0:
+			registerCopy(this.MBR, this.R0);
+			break;
+		case 1:
+			registerCopy(this.MBR, this.R1);
+			break;
+		case 2:
+			registerCopy(this.MBR, this.R2);
+			break;
+		case 3:
+			registerCopy(this.MBR, this.R3);
+			break;
+		default:
+			System.out.println("Unkown target register passed in LDR instruction");
+			break;
+		}
+	}
+
+	private void executeSTR(int[] R, int[] IX, int[] I, int[] address) {
+		// TODO Auto-generated method stub
+		// calculating effective address
+		int effectiveAddress = 0;
+		// copying contents of IR to EA
+		int indexingRegister = Utilities.bin2dec(IX);
+		switch (indexingRegister) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+		}
+		// c(addressField)
+		effectiveAddress += Utilities.bin2dec(address);// c(ir)+c(address)
+		// indirect addressing
+		// ea=c(c(iX)+c(addressField))
+
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);// c(c(ir)+c(addressField))
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); // copies EA to MAR
+
+		int register = Utilities.bin2dec(R);
+		System.out.println(Arrays.toString(this.R3));
+		switch (register) {
+		case 0:
+			registerCopy(this.R0, this.MBR);
+			break;
+		case 1:
+			registerCopy(this.R1, this.MBR);
+			break;
+		case 2:
+			registerCopy(this.R2, this.MBR);
+			break;
+		case 3:
+			registerCopy(this.R3, this.MBR);
+			break;
+		default:
+			break;
+		}
+		store();
+		this.I.updateDisplay();
+	}
+
     /**
      * Loads from memory the contents at the address specified by the MAR into the MBR.
      */
@@ -197,6 +314,51 @@ public class Simulator {
         // Notify the interface that changes may have been made
         this.I.updateDisplay();
     }
+
+    /**
+     * allows you to choose file to load into memory.
+     */
+    public void init() {
+        try{
+            JFileChooser fileChooser = new JFileChooser();
+            int returnValue = fileChooser.showOpenDialog(null);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
+                FileInputStream fstream = new FileInputStream(selectedFile);
+                DataInputStream in = new DataInputStream(fstream);
+                BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                String strLine;
+                int[] mbr = new int[16];
+                int count = 0; 
+
+                while ((strLine = br.readLine()) != null)   {
+                    String[] tokens = strLine.split(" ");
+
+                    mbr = Utilities.hex2bin(tokens[1], 16);
+                    ma[count] = Integer.parseInt(tokens[0], 16);
+                    count += 1;
+                    lines += 1;
+                    
+                    this.M.set(Integer.parseInt(tokens[0], 16), mbr);
+                }           
+                in.close();
+                System.out.println(this.M);
+            }
+        }catch (Exception err){
+              System.err.println("Error: " + err.getMessage());
+            }
+    }
+    /**
+     * allows you to choose file to load into memory.
+     *
+    public void run() {
+        String[] reg = {"R0", "R1", "R2", "R3", "X1", "X2", "X3"};
+        for (int i = 0; i < reg.length; i++) {
+            updateRegister(reg[i], this.M.get(ma[i]));
+        }
+        incrementPC();
+        this.I.updateDisplay();
+    }*/
 
     /**
      * Sets the register with name n to have the value v.

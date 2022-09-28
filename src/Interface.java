@@ -1,43 +1,37 @@
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import javax.swing.border.EmptyBorder;
-
 /**
  * A graphical user interface for using the simulated computer
  */
 public class Interface extends JFrame {
-    /** The main panel on which the interface is built. */
+    /** The different panels which makes up the JFrame for the graphical user interface. */
     JPanel rPanel;
     JPanel mPanel;
-    JPanel bPanel;
-    
-    // JPanel hPanel;
+    JPanel bPanel;    
+    JPanel hPanel;
 
     /** A simulator for this interace to interact with and display. */
     Simulator S;
     
     /** The names of the registers in the simulator (that are also displated on the interface). */
-    String[] REG_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR"};
+    //String[] REG_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR", "MAR", "MBR", "MFR", "X1", "X2", "X3"};
+    String[] R_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR"};
     String[] M_NAMES = {"MAR", "MBR", "MFR", "X1", "X2", "X3"};
     
     /** The sizes of the registers in the simulator (that are also displated on the interface). */
-    int[] REG_SIZES = {16, 16, 16, 16, 12, 4, 16};
-    int[] M_SIZES = { 12, 16, 4, 16, 16, 16};
+    //int[] REG_SIZES = {16, 16, 16, 16, 12, 4, 16, 12, 16, 4, 16, 16, 16};
+    int[] R_SIZES = {16, 16, 16, 16, 12, 4, 16};
+    int[] M_SIZES = {12, 16, 4, 16, 16, 16};
     
     /** An array of the register objects for the registers. */
-    Register[] registers;
-    Register[] m;
+    Register[] rRegisters;
+    Register[] mRegisters;
 
-    // JTextField haultField = new JTextField(5);
-    // JLabel hault = new JLabel("Hault");
-
-    // JTextField runField = new JTextField(5);
-    // JLabel run = new JLabel("Run");
     
     /**
      * Constructs and opens an interface with a simulator ready to run with all registers and memory intially set to zero.
@@ -52,48 +46,37 @@ public class Interface extends JFrame {
         int h = 1080;
         this.setSize(w,h);
         this.getContentPane().setBackground(new Color(40, 40, 40));
-        // this.panel = new JPanel(new GridLayout(20,1));
         rPanel = new JPanel(new GridLayout(10, 1, 5, 5));
-        // rPanel.setLayout(new GridLayout(10, 1, 5, 5));
         // rPanel.setBackground(new Color(40, 40, 40));
-        // rPanel.setLayout(new BoxLayout(rPanel, BoxLayout.Y_AXIS));
 
         mPanel = new JPanel(new GridLayout(10, 1, 5, 5));
         // mPanel.setBackground(new Color(40, 40, 40));
 
         bPanel = new JPanel();
         // bPanel.setBackground(new Color(40, 40, 40));
-        // bPanel.setLayout(new BoxLayout(bPanel, BoxLayout.X_AXIS));
 
-        // hPanel = new JPanel();
-        // hPanel.add(haultField);
-        // hPanel.add(hault);
-        // hPanel.add(runField);
-        // hPanel.add(run);
+        hPanel = new JPanel();
+
 
         this.setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
-        this.add(rPanel);
-        this.add(mPanel);
-        // this.add(bPanel, BorderLayout.SOUTH);
-        // this.add(rPanel, BorderLayout.WEST);
-        // this.add(mPanel, BorderLayout.EAST);
-        // this.add(bPanel, BorderLayout.SOUTH);
-
+       
         // Set the simulator instance for this interface
         this.S = S;
 
         // Create registers
-        registers = addRegisters(this.S, rPanel, REG_NAMES, REG_SIZES);
-        m = addRegisters(this.S, mPanel, M_NAMES, M_SIZES);
+        rRegisters = addRegisters(this.S, rPanel, R_NAMES, R_SIZES);
+        mRegisters = addRegisters(this.S, mPanel, M_NAMES, M_SIZES);
 
         // Create controls
-        addControls(bPanel);
+        addControls(bPanel, hPanel);
 
-        // bPanel.add(haultField, BoxLayout.Y_AXIS);
-        // bPanel.add(hault);
 
         mPanel.add(bPanel);
-        // mPanel.add(hPanel);
+        mPanel.add(hPanel);
+
+        
+        this.add(rPanel);
+        this.add(mPanel);
 
         // Set visibile
         this.setVisible(true);
@@ -123,7 +106,7 @@ public class Interface extends JFrame {
     /**
      * Adds other controls to the user interface like a "step" button. 
      */
-    public void addControls(JPanel panel) {
+    public void addControls(JPanel panel, JPanel hJPanel) {
         // Create a single step button that executes the next instruction (and increments the PC, et cetera)
         panel.add(createStepButton());
 
@@ -133,7 +116,11 @@ public class Interface extends JFrame {
         // Create a store button that stores into the memory at address MAR the value in MBR
         panel.add(createStoreButton());
         
+        // Create a store button that stores into the memory at address MAR the value in MBR
         panel.add(createInitButton());
+
+        // Create a store button that stores into the memory at address MAR the value in MBR
+        //hJPanel.add(createRunButton());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -181,8 +168,31 @@ public class Interface extends JFrame {
         // Return this button
         return button;
     }
-    public JButton createInitButton() {
+    /**
+     * Creates run button for panel.
+     */
+    public JButton createRunButton() {
         // Create the single step button
+        JButton button = new JButton("Run");
+        button.setPreferredSize((new Dimension(100,50)));
+        button.setFocusable(false);
+
+        // Add an action listener that can call the simulator's step function upon this button being clicked
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                this.S.run();
+            }
+        });
+
+        // Return this button
+        return button;
+    }
+
+    /**
+     * Creates init button for panel.
+     */
+    public JButton createInitButton() {
+        // Create the init button
         JButton button = new JButton("Init");
         button.setForeground(Color.RED);
         button.setPreferredSize((new Dimension(100,50)));
@@ -190,10 +200,11 @@ public class Interface extends JFrame {
 
 
         // // Add an action listener that can call the simulator's step function upon this button being clicked
-        // button.addActionListener(new InterfaceActionListener(this.S) {
-        //     public void actionPerformed(ActionEvent e) {
-        //     }
-        // });
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                this.S.init();
+            }
+        });
 
         // Return this button
         return button;
@@ -246,8 +257,12 @@ public class Interface extends JFrame {
      */
     public void updateDisplay() {
         // Update registers
-        for (int i = 0; i < this.registers.length; i++) {
-            this.registers[i].update(this.S.getRegister(REG_NAMES[i]));
+        for (int i = 0; i < this.rRegisters.length; i++) {
+            this.rRegisters[i].update(this.S.getRegister(R_NAMES[i]));
+        }
+
+        for (int i = 0; i < this.mRegisters.length; i++) {
+            this.mRegisters[i].update(this.S.getRegister(M_NAMES[i]));
         }
 
         // Update other things... in the future
@@ -285,9 +300,9 @@ class Register {
     /** The name of this register. */
     String name;
 
-
-    ImageIcon lit = new ImageIcon("icons/blue-24.png");
-    ImageIcon unlit = new ImageIcon("icons/grey-24.png");
+    /** ImageIcons for the radio buttons to simulate the selected and not-selected state  */
+    ImageIcon lit = new ImageIcon((getClass().getResource("icons/blue-24.png")));
+    ImageIcon unlit = new ImageIcon(getClass().getResource("icons/grey-24.png"));
 
     /** 
      * Creates a register for the simulator S on interface panel panel with name name and size size (number of bits).
@@ -297,6 +312,7 @@ class Register {
      * @param name the name of this register
      * @param size the number of bits in this register
      */
+
     public Register(Simulator S, JPanel panel, String name, int size) {
         this.name = name;
         buttons = new JRadioButton[size];
