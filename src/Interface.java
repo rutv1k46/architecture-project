@@ -68,7 +68,7 @@ public class Interface extends JFrame {
         mRegisters = addRegisters(this.S, mPanel, M_NAMES, M_SIZES);
 
         // Create controls
-        addControls(bPanel, hPanel);
+        addControls();
 
 
         mPanel.add(bPanel);
@@ -106,18 +106,18 @@ public class Interface extends JFrame {
     /**
      * Adds other controls to the user interface like a "step" button. 
      */
-    public void addControls(JPanel panel, JPanel hJPanel) {
+    public void addControls() {
         // Create a single step button that executes the next instruction (and increments the PC, et cetera)
-        panel.add(createStepButton());
+        bPanel.add(createStepButton());
 
         // Create a load button that loads into the MBR the value at the MAR address in memory
-        panel.add(createLoadButton());
+        bPanel.add(createLoadButton());
 
         // Create a store button that stores into the memory at address MAR the value in MBR
-        panel.add(createStoreButton());
+        bPanel.add(createStoreButton());
         
         // Create a store button that stores into the memory at address MAR the value in MBR
-        panel.add(createInitButton());
+        bPanel.add(createInitButton());
 
         // Create a store button that stores into the memory at address MAR the value in MBR
         //hJPanel.add(createRunButton());
@@ -168,6 +168,7 @@ public class Interface extends JFrame {
         // Return this button
         return button;
     }
+
     /**
      * Creates run button for panel.
      */
@@ -180,7 +181,7 @@ public class Interface extends JFrame {
         // Add an action listener that can call the simulator's step function upon this button being clicked
         button.addActionListener(new InterfaceActionListener(this.S) {
             public void actionPerformed(ActionEvent e) {
-                this.S.run();
+                //this.S.run();
             }
         });
 
