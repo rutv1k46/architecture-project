@@ -123,17 +123,13 @@ public class Simulator {
         // opcode = 1;
         // Switch on the opcode
         switch (opcode) {
-            case 1:
-                // R[0] = 1;
-                // address[0] = 1;
-                executeLDR(R, IX, I, address);
+            case 1:               
                 // LDR r, x, address[,I]
-                // System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                executeLDR(R, IX, I, address);
                 break;
-                case 2:
+            case 2:
                 // STR r, x, address[,I] 
                 executeSTR(R, IX, I, address);
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
                 break;
             case 3:
                 // LDA r, x, address[,I] 
@@ -291,7 +287,6 @@ public class Simulator {
 		case 3:
 			registerCopy(this.R3, this.MBR);
 			break;
-
 		default:
 			break;
 		}
@@ -355,7 +350,7 @@ public class Simulator {
     }
     /**
      * allows you to choose file to load into memory.
-     */
+     *
     public void run() {
         String[] reg = {"R0", "R1", "R2", "R3", "X1", "X2", "X3"};
         for (int i = 0; i < reg.length; i++) {
@@ -363,7 +358,7 @@ public class Simulator {
         }
         incrementPC();
         this.I.updateDisplay();
-    }
+    }*/
 
     /**
      * Sets the register with name n to have the value v.

@@ -20,18 +20,18 @@ public class Interface extends JFrame {
     Simulator S;
     
     /** The names of the registers in the simulator (that are also displated on the interface). */
-    String[] REG_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR", "MAR", "MBR", "MFR", "X1", "X2", "X3"};
+    //String[] REG_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR", "MAR", "MBR", "MFR", "X1", "X2", "X3"};
     String[] R_NAMES = {"R0", "R1", "R2", "R3", "PC", "CC", "IR"};
     String[] M_NAMES = {"MAR", "MBR", "MFR", "X1", "X2", "X3"};
     
     /** The sizes of the registers in the simulator (that are also displated on the interface). */
-    int[] REG_SIZES = {16, 16, 16, 16, 12, 4, 16, 12, 16, 4, 16, 16, 16};
+    //int[] REG_SIZES = {16, 16, 16, 16, 12, 4, 16, 12, 16, 4, 16, 16, 16};
     int[] R_SIZES = {16, 16, 16, 16, 12, 4, 16};
     int[] M_SIZES = {12, 16, 4, 16, 16, 16};
     
     /** An array of the register objects for the registers. */
-    Register[] registers;
-    Register[] m;
+    Register[] rRegisters;
+    Register[] mRegisters;
 
     
     /**
@@ -66,8 +66,8 @@ public class Interface extends JFrame {
         this.S = S;
 
         // Create registers
-        registers = addRegisters(this.S, rPanel, R_NAMES, REG_SIZES);
-        m = addRegisters(this.S, mPanel, M_NAMES, M_SIZES);
+        rRegisters = addRegisters(this.S, rPanel, R_NAMES, R_SIZES);
+        mRegisters = addRegisters(this.S, mPanel, M_NAMES, M_SIZES);
 
         // Create controls
         addControls(bPanel, hPanel);
@@ -115,7 +115,7 @@ public class Interface extends JFrame {
         panel.add(createInitButton());
 
         // Create a store button that stores into the memory at address MAR the value in MBR
-        hJPanel.add(createRunButton());
+        //hJPanel.add(createRunButton());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -235,12 +235,12 @@ public class Interface extends JFrame {
      */
     public void updateDisplay() {
         // Update registers
-        for (int i = 0; i < this.registers.length; i++) {
-            this.registers[i].update(this.S.getRegister(REG_NAMES[i]));
+        for (int i = 0; i < this.rRegisters.length; i++) {
+            this.rRegisters[i].update(this.S.getRegister(R_NAMES[i]));
         }
 
-        for (int i = 0; i < this.m.length; i++) {
-            this.m[i].update(this.S.getRegister(M_NAMES[i]));
+        for (int i = 0; i < this.mRegisters.length; i++) {
+            this.mRegisters[i].update(this.S.getRegister(M_NAMES[i]));
         }
 
         // Update other things... in the future
@@ -452,10 +452,8 @@ class RegisterListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         // Update this register's value in the register object
         if (this.R.arr[i] == 0) {
-            this.S.IR[i] = 1;
             this.R.arr[i] = 1;
         } else {
-            this.S.IR[i] = 0;
             this.R.arr[i] = 0;
         }
         // Update this register's value in the simulator
