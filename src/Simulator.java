@@ -125,23 +125,28 @@ public class Simulator {
         switch (opcode) {
             case 1:               
                 // LDR r, x, address[,I]
+                System.out.println("opcode " + opcode + ",(LDR) is being  executed");
                 executeLDR(R, IX, I, address);
                 break;
             case 2:
                 // STR r, x, address[,I] 
+                System.out.println("opcode " + opcode + ",(STR) is being  executed");
                 executeSTR(R, IX, I, address);
                 break;
             case 3:
-                // LDA r, x, address[,I] 
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                // LDA r, x, address[,I]
+                System.out.println("opcode " + opcode + ",(LDA) is being  executed");
+                executeLDA(R,IX,I,address);
                 break;
             case 33:
-                // LDX x, address[,I] 
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                // LDX x, address[,I]
+                System.out.println("opcode " + opcode + ",(LDX) is being  executed");
+                executeLDX(R, IX, I, address);
                 break;
             case 34:
-                // STX x, address[,I] 
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                // STX x, address[,I]
+                System.out.println("opcode " + opcode + ",(STX) is being  executed");
+                executeSTX(R, IX, I, address);
                 break;
             case 8:
                 // JZ r, x, address[,I]
@@ -292,6 +297,158 @@ public class Simulator {
 		}
 		store();
 		this.I.updateDisplay();
+	}
+
+    	//copying effective address to targetRegister
+	private void executeLDA(int[] R, int[] IX, int[] I, int[] address) {
+
+		// calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		int indexingRegister = Utilities.bin2dec(IX);
+		switch (indexingRegister) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+		}
+
+		// indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		//copying effective address to MBR
+		updateRegister("MBR", Utilities.dec2bin(effectiveAddress, 12));
+		
+		int targetRegister = Utilities.bin2dec(R);
+		switch (targetRegister) {
+		case 0:
+			registerCopy(this.MBR, this.R0);
+			break;
+		case 1:
+			registerCopy(this.MBR, this.R1);
+			break;
+		case 2:
+			registerCopy(this.MBR, this.R2);
+			break;
+		case 3:
+			registerCopy(this.MBR, this.R3);
+			break;
+		default:
+			System.out.println("Unkown target register passed in LDA instruction");
+			break;
+		}
+	}
+
+    //copy contents in effectiveAddress to target index register
+	private void executeLDX(int[] R, int[] IX, int[] I, int[] address) {
+
+		// calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		int indexingRegister = Utilities.bin2dec(IX);
+		switch (indexingRegister) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+		}
+
+		// indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		load(); // copies contents in address of MAR to MBR
+
+		switch (indexingRegister) {
+		case 1:
+			registerCopy(this.MBR, this.X1);
+			break;
+		case 2:
+			registerCopy(this.MBR, this.X2);
+			break;
+		case 3:
+			registerCopy(this.MBR, this.X3);
+			break;
+		default:
+			System.out.println("Unkown target register passed in LDX instruction");
+			break;
+		}
+	}
+
+    //copying value from index register to effective register
+	private void executeSTX(int[] R, int[] IX, int[] I, int[] address) {
+		// calculating effective address
+				int effectiveAddress = 0;
+				// copying contents of IR to EA
+				int indexingRegister = Utilities.bin2dec(IX);
+				switch (indexingRegister) {
+				// c(iX)
+				case 0:
+					break;
+				case 1:
+					effectiveAddress += Utilities.bin2dec(this.X1);
+					break;
+				case 2:
+					effectiveAddress += Utilities.bin2dec(this.X2);
+					break;
+				case 3:
+					effectiveAddress += Utilities.bin2dec(this.X3);
+				default:
+					System.out.println("Unknown indexing register passed");
+				}
+				// c(addressField)
+				effectiveAddress += Utilities.bin2dec(address);// c(ir)+c(address)
+				// indirect addressing
+				// ea=c(c(iX)+c(addressField))
+
+				if (I[0] == 1) {
+					updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+					load();// mbr has c(c(ir)+c(addressField))
+					effectiveAddress = Utilities.bin2dec(this.MBR);// c(c(ir)+c(addressField))
+				}
+				updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); // copies EA to MAR
+
+				switch (indexingRegister) {
+				case 1:
+					registerCopy(this.X1, this.MBR);
+					break;
+				case 2:
+					registerCopy(this.X2, this.MBR);
+					break;
+				case 3:
+					registerCopy(this.X3, this.MBR);
+					break;
+				default:
+					System.out.println("Unknown indexing register passed");
+				}
+				store();
+				this.I.updateDisplay();
 	}
 
     /**
