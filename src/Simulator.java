@@ -48,6 +48,9 @@ public class Simulator {
     /** Main memory. */
     Memory M;
 
+    /** Boolean which indicates whether the machine is currently halted. */
+    boolean halted = true;
+
     int[] ma = new int[12];
     int lines = 0;
 
@@ -155,38 +158,47 @@ public class Simulator {
                 * Else PC <- PC+1 
                 */
                 System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                this.halted = true;
                 break;
             case 9:
                 // JNE r, x, address[,I] 
                 System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                this.halted = true;
                 break;
             case 10:
                 // JCC cc, x, address[,I] 
                 System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                this.halted = true;
                 break;
             case 11:
                 // JMA x, address[,I]
                 System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                this.halted = true;
                 break;
             case 12:
                 // JSR x, address[,I] 
                 System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                this.halted = true;
                 break;
             case 13:
                 // RFS Immed 
                 System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                this.halted = true;
                 break;
             case 14:
                 // SOB r, x, address[,I] 
                 System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                this.halted = true;
                 break;
             case 15:
                 // JGE r,x, address[,I]
                 System.out.println("opcode "+opcode+" was given but is not yet implemented");
+                this.halted = true;
                 break;
             default:
                 // Invalid opcode (this opcode is not specified)
-                System.out.println("invalid opcode recieved: "+opcode+" in decimal");            
+                System.out.println("invalid opcode recieved: "+opcode+" in decimal");   
+                this.halted = true;         
         }
     }
 
@@ -210,6 +222,7 @@ public class Simulator {
 			effectiveAddress += Utilities.bin2dec(this.X3);
 		default:
 			System.out.println("Unknown indexing register passed");
+            this.halted = true;
 		}
 
 		// indirect addressing
@@ -264,6 +277,7 @@ public class Simulator {
 			effectiveAddress += Utilities.bin2dec(this.X3);
 		default:
 			System.out.println("Unknown indexing register passed");
+            this.halted = true;
 		}
 		// c(addressField)
 		effectiveAddress += Utilities.bin2dec(address);// c(ir)+c(address)
@@ -278,7 +292,6 @@ public class Simulator {
 		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); // copies EA to MAR
 
 		int register = Utilities.bin2dec(R);
-		System.out.println(Arrays.toString(this.R3));
 		switch (register) {
 		case 0:
 			registerCopy(this.R0, this.MBR);
@@ -320,6 +333,7 @@ public class Simulator {
 			effectiveAddress += Utilities.bin2dec(this.X3);
 		default:
 			System.out.println("Unknown indexing register passed");
+            this.halted = true;
 		}
 
 		// indirect addressing
@@ -348,6 +362,7 @@ public class Simulator {
 			break;
 		default:
 			System.out.println("Unkown target register passed in LDA instruction");
+            this.halted = true;
 			break;
 		}
 	}
@@ -373,6 +388,7 @@ public class Simulator {
 			effectiveAddress += Utilities.bin2dec(this.X3);
 		default:
 			System.out.println("Unknown indexing register passed");
+            this.halted = true;
 		}
 
 		// indirect addressing
@@ -397,6 +413,7 @@ public class Simulator {
 			break;
 		default:
 			System.out.println("Unkown target register passed in LDX instruction");
+            this.halted = true;
 			break;
 		}
 	}
@@ -421,6 +438,7 @@ public class Simulator {
 					effectiveAddress += Utilities.bin2dec(this.X3);
 				default:
 					System.out.println("Unknown indexing register passed");
+                    this.halted = true;
 				}
 				// c(addressField)
 				effectiveAddress += Utilities.bin2dec(address);// c(ir)+c(address)
@@ -446,6 +464,7 @@ public class Simulator {
 					break;
 				default:
 					System.out.println("Unknown indexing register passed");
+                    this.halted = true;
 				}
 				store();
 				this.I.updateDisplay();
@@ -507,15 +526,15 @@ public class Simulator {
     }
     /**
      * allows you to choose file to load into memory.
-     *
+     */
     public void run() {
-        String[] reg = {"R0", "R1", "R2", "R3", "X1", "X2", "X3"};
-        for (int i = 0; i < reg.length; i++) {
-            updateRegister(reg[i], this.M.get(ma[i]));
+        halted = false;
+        while (!this.halted) {
+            this.step();
+            this.I.updateDisplay();
         }
-        incrementPC();
-        this.I.updateDisplay();
-    }*/
+        System.out.println("ran until halted...");
+    }
 
     /**
      * Sets the register with name n to have the value v.
@@ -528,6 +547,7 @@ public class Simulator {
         for (int i = 0; i < v.length; i++) {
             if (v[i] != 0 && v[i] != 1) {
                 System.out.println("the " + i + "th value of v in the set function of Simulator.java is " + v[i] + " but should be zero or one only");
+                this.halted = true;
             }
         }
 
@@ -571,6 +591,7 @@ public class Simulator {
                 break;
             default:
                 System.out.println("In the updateRegister function in the Simulator class recieved string: "+name);
+                this.halted = true;
         }
     }
 
@@ -611,6 +632,7 @@ public class Simulator {
                 return X3; 
             default:
                 System.out.println("In the getRegister function in the Simulator class recieved string: "+name);
+                this.halted = true;
         }
         int[] r = {-1};
         return r;
@@ -650,12 +672,14 @@ public class Simulator {
         // Check that the two registers are of the same length
         if (from.length != to.length) {
             System.out.println("in registerCopy of Simulator, from has length "+from.length+" whereas to has length "+to.length+" but they should be the same");
+            this.halted = true;
             return;
         }
         // Check that the value being copied consists only of ones and zeros (as it should)
         for (int i = 0; i < from.length; i++) {
             if (from[i] != 0 && from[i] != 1) {
                 System.out.println("in registerCopy of Simulator, from contains a "+from[i]+" at position "+i+" but should conly contain ones and zeros");
+                this.halted = true;
                 return;
             }
         }

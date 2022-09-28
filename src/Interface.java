@@ -120,7 +120,7 @@ public class Interface extends JFrame {
         bPanel.add(createInitButton());
 
         // Create a store button that stores into the memory at address MAR the value in MBR
-        //hJPanel.add(createRunButton());
+        hPanel.add(createRunButton());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -181,7 +181,7 @@ public class Interface extends JFrame {
         // Add an action listener that can call the simulator's step function upon this button being clicked
         button.addActionListener(new InterfaceActionListener(this.S) {
             public void actionPerformed(ActionEvent e) {
-                //this.S.run();
+                this.S.run();
             }
         });
 
