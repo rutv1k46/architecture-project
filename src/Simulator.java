@@ -51,7 +51,7 @@ public class Simulator {
     /** Boolean which indicates whether the machine is currently halted. */
     boolean halted = true;
 
-    int[] ma = new int[12];
+    int[] MAR_INIT = new int[100];
     int lines = 0;
 
     /** An interface that is notified when the state of this simulated machine changes. */
@@ -504,18 +504,18 @@ public class Simulator {
                 DataInputStream in = new DataInputStream(fstream);
                 BufferedReader br = new BufferedReader(new InputStreamReader(in));
                 String strLine;
-                int[] mbr = new int[16];
+                int[] MBR_INIT = new int[16];
                 int count = 0; 
 
                 while ((strLine = br.readLine()) != null)   {
                     String[] tokens = strLine.split(" ");
 
-                    mbr = Utilities.hex2bin(tokens[1], 16);
-                    ma[count] = Integer.parseInt(tokens[0], 16);
+                    MBR_INIT = Utilities.hex2bin(tokens[1], 16);
+                    MAR_INIT[count] = Integer.parseInt(tokens[0], 16);
                     count += 1;
                     lines += 1;
                     
-                    this.M.set(Integer.parseInt(tokens[0], 16), mbr);
+                    this.M.set(Integer.parseInt(tokens[0], 16), MBR_INIT);
                 }           
                 in.close();
                 System.out.println(this.M);
