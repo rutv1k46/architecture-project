@@ -344,7 +344,7 @@ public class Simulator {
 			effectiveAddress = Utilities.bin2dec(this.MBR);
 		}
 		//copying effective address to MBR
-		updateRegister("MBR", Utilities.dec2bin(effectiveAddress, 12));
+		updateRegister("MBR", Utilities.dec2bin(effectiveAddress, 16));
 		
 		int targetRegister = Utilities.bin2dec(R);
 		switch (targetRegister) {
