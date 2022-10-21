@@ -3,13 +3,35 @@
  */
 public class Utilities {
     /** 
-     * Converts a binary number to a decimal number taking input as an integer array as is standard in this simulator. 
+     * Converts a generally used binary number to a decimal number taking input as an integer array as is standard in this simulator. 
+     * Can be positive or negative with the first bit denoting so (0 or 1 respectively) and the remaining bits being
+     * typical magnitude in binary.
      * 
      * @param a the integer array in binary (all zeros and ones) to be converted
      * 
      * @return the decimal number 
      */
+    @Deprecated
     public static int bin2dec(int[] a) {
+        int r = 0;
+        for (int i = a.length - 1; i >= 1; i--) {
+            r += a[i] * Math.pow(2, (a.length - 1 - i));
+        }
+        if (a[0] == 1) {
+            r *= -1;
+        }
+        return r;
+    }
+
+    /** 
+     * Converts a positive only binary number to a decimal number taking input as an integer array as is standard in this simulator. 
+     * 
+     * @param a the integer array in binary (all zeros and ones) to be converted
+     * 
+     * @return the decimal number 
+     */
+    @Deprecated
+    public static int bin2decDirect(int[] a) {
         int r = 0;
         for (int i = a.length - 1; i >= 0; i--) {
             r += a[i] * Math.pow(2, (a.length - 1 - i));
@@ -18,14 +40,53 @@ public class Utilities {
     }
 
     /**
-     * Converts a decimal number to binary (as an array of integers each zero or one).
+     * Converts a decimal number to binary accounting for negative and positive numbers, that is
+     * if the number is positive then it will make the first bit (sign bit) 0 and the rest of the bits
+     * the magnitude of the number in binary. If the number is negative then the first bit (sign bit) will
+     * be 1 and the rest of the numbers still just the magnitude of the number in binary.
+     * 
+     * @param a
+     * @param size
+     * @return
+     */
+    public static int[] dec2bin(int a, int size) {
+        int overall_size = size;
+        int mag_size = overall_size - 1;
+        if (a > 0) {
+            // Positive number so make the sign bit 0
+            int[] v = new int[overall_size];
+            v[0] = 0;
+            for (int i = 1; i < overall_size; i++) {
+                if (a - Math.pow(2, mag_size - 1 - i) >= 0) {
+                    v[i] = 1;
+                    a -= Math.pow(2, mag_size - 1 - i);
+                }
+            }
+            return v;
+        } else {
+            //Negative number so make the sign bit 1
+            int[] v = new int[overall_size];
+            v[0] = 1;
+            for (int i = 1; i < overall_size; i++) {
+                 if (a - Math.pow(2, mag_size - 1 - i) >= 0) {
+                     v[i] = 1;
+                     a -= Math.pow(2, mag_size - 1 - i);
+                 }
+             }
+             return v;
+        }
+    }
+
+    /**
+     * Converts a decimal number to binary directly, assuming just a positive number
      * 
      * @param a the decimal number to be converted
      * @param size the number of desired bits in the converted binary number that gets returned
      * 
      * @return -1 if size is not sufficient to store the value of a and otherwise returns the converted-to-binary version as an int array of zeros and ones
      */
-    public static int[] dec2bin(int a, int size) {
+    @Deprecated
+    public static int[] dec2binDirect(int a, int size) {
         int[] v = new int[size];
         for (int i = 0; i < size; i++) {
             if (a - Math.pow(2, size - 1 - i) >= 0) {
@@ -33,8 +94,10 @@ public class Utilities {
                 a -= Math.pow(2, size - 1 - i);
             }
         }
+        
         return v;
     }
+    
     public static int[] hex2bin(String hex, int size){
         int d = Integer.parseInt(hex, 16);
         return dec2bin(d, size);
