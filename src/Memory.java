@@ -1,11 +1,18 @@
 /**
- * Memory for the LOR simulator
+ * Memory for the LOR simulator with simple cache simulation 
+ * (cache is just 16 memory addresses maintained in separate list for initial checking before all of memory)
  */
+import java.util.ArrayList;
 public class Memory {
     /**
      * An array for the memory itself
      */
     private int[][] M;
+    /**
+     * An array for cache - which addresses are currenlty in cache
+     */
+    private ArrayList<Integer> cache_addresses;
+    private int CACHE_SIZE = 16;
     /**
      * The number of bits in a word
      */
@@ -19,6 +26,11 @@ public class Memory {
      */
     public Memory(int size) {
         this.M = new int[size][WORD_SIZE];
+        this.cache_addresses = new ArrayList<Integer>();
+        // initally set all cache addresses to -1
+        for (int i = 0; i < CACHE_SIZE; i++) {
+            cache_addresses.add(-1);
+        }
     }
 
     /** 
@@ -34,11 +46,42 @@ public class Memory {
             System.out.println("attempt to access address " + a);
             return ret;
         }
+        // Now checks whether this address is currently in cache
+        boolean inCache = isInCache(a);
+        if (inCache) {
+            System.out.println("cache hit! for a get of address "+a);
+        }
         // Returns value of M[a] if a is a valid address
         for (int i = 0; i < WORD_SIZE; i++) {
             ret[i] = M[a][i];
         }
+        // If was not already in cache, we now add this address to cache
+        if (!inCache) {
+            this.addToCache(a);
+        }
         return ret;
+    }
+
+    public boolean isInCache(int a) {
+        boolean inCache = false;
+        for (int i = 0; i < CACHE_SIZE; i++) {
+            if (this.cache_addresses.get(i) == a) {
+                inCache = true;
+            }
+        }
+        return inCache;
+    }
+
+    /*
+     * Adds memory address a to cache
+     * 
+     * @param a         the address in memory to be added to cache
+     */
+    public void addToCache(int a) {
+        // remove current first entry in cache to make room for this new one
+        int rmad = this.cache_addresses.remove(0);
+        this.cache_addresses.add(a);
+        System.out.println("address "+a+" was not in cache, so we now have added it to cache and removed "+rmad);
     }
 
     /**
@@ -66,11 +109,20 @@ public class Memory {
                 return -1;
             }
         }
+        // Check if in cache 
+        boolean inCache = isInCache(a);
+        if (inCache) {
+            System.out.println("cache hit! for a set of address "+a);
+        }
+        // Set in the memory array so we have it updated for the simulator what the value is there (a write-through writing policy)
         // Set the value and return 0
         for (int i = 0; i < WORD_SIZE; i++) {
             M[a][i] = v[i];
         }
         return 0;
+        // Note that we choose the simple cache policy of write-through when the address is already in cache
+        // but if the address is not in cache we do not choose to move it to cache for sets. this is a design decision per
+        // machine and we choose the simplifying decision here since there are no real motivating use-cases for this machine
     }
 
     /**
