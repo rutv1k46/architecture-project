@@ -41,4 +41,17 @@ public class Utilities {
             // return new BigInteger(hex, 16).toString(2);
           
     }
+
+    // Returns '0' for '1' and '1' for '0'
+    public static int[] OnesComplement(int[] arr){
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == 0){
+                arr[i] = 1;
+            }
+            else{
+                arr[i] = 0;
+            }
+        }
+        return arr;
+    }
 }

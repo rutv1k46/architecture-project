@@ -128,27 +128,43 @@ public class Simulator {
         switch (opcode) {
             case 1:               
                 // LDR r, x, address[,I]
-                System.out.println("opcode " + opcode + ",(LDR) is being  executed");
+                System.out.println("opcode " + opcode + ",(LDR) is being executed");
                 executeLDR(R, IX, I, address);
                 break;
             case 2:
                 // STR r, x, address[,I] 
-                System.out.println("opcode " + opcode + ",(STR) is being  executed");
+                System.out.println("opcode " + opcode + ",(STR) is being executed");
                 executeSTR(R, IX, I, address);
                 break;
             case 3:
                 // LDA r, x, address[,I]
-                System.out.println("opcode " + opcode + ",(LDA) is being  executed");
+                System.out.println("opcode " + opcode + ",(LDA) is being executed");
                 executeLDA(R,IX,I,address);
+                break;
+            case 4:
+                System.out.println("opcode " + opcode + ",(AMR) is being executed");
+                executeAMR(R, IX, I, address);
+                break;
+            case 5: 
+                System.out.println("opcode " + opcode + ",(SMR) is being executed");
+                executeSMR(R, IX, I, address);
+                break;
+            case 6:
+                System.out.println("opcode " + opcode + ",(AIR) is being executed");
+                executeAIR(R, address);
+                break;
+            case 7:
+                System.out.println("opcode " + opcode + ",(SIR) is being executed");
+                executeSIR(R, address);
                 break;
             case 33:
                 // LDX x, address[,I]
-                System.out.println("opcode " + opcode + ",(LDX) is being  executed");
+                System.out.println("opcode " + opcode + ",(LDX) is being executed");
                 executeLDX(R, IX, I, address);
                 break;
             case 34:
                 // STX x, address[,I]
-                System.out.println("opcode " + opcode + ",(STX) is being  executed");
+                System.out.println("opcode " + opcode + ",(STX) is being executed");
                 executeSTX(R, IX, I, address);
                 break;
             case 8:
@@ -157,23 +173,27 @@ public class Simulator {
                 * If c(r) = 0, then PC  EA
                 * Else PC <- PC+1 
                 */
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
-                this.halted = true;
+                System.out.println("opcode "+opcode+" ,(JZ) is being executed");
+                // this.halted = true;
+                executeJZ(R, IX, I, address);
                 break;
             case 9:
                 // JNE r, x, address[,I] 
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
-                this.halted = true;
+                System.out.println("opcode "+opcode+" ,(JNE) is being executed");
+                // this.halted = true;
+                executeJNE(R, IX, I, address);
                 break;
             case 10:
                 // JCC cc, x, address[,I] 
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
-                this.halted = true;
+                System.out.println("opcode "+opcode+" ,(JCC) is being executed");
+                // this.halted = true;
+                executeJCC(CC, IX, I, address);
                 break;
             case 11:
                 // JMA x, address[,I]
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
-                this.halted = true;
+                System.out.println("opcode "+opcode+" ,(JMA) is being executed");
+                // this.halted = true;
+                executeJMA(IX, I, address);
                 break;
             case 12:
                 // JSR x, address[,I] 
@@ -182,19 +202,30 @@ public class Simulator {
                 break;
             case 13:
                 // RFS Immed 
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
-                this.halted = true;
+                System.out.println("opcode "+opcode+" ,(RFS) is being executed");
+                // this.halted = true;
+                executeRFS(address);
                 break;
             case 14:
                 // SOB r, x, address[,I] 
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
-                this.halted = true;
+                System.out.println("opcode "+opcode+" ,(SOB) is being executed");
+                // this.halted = true;
+                executeSOB(R, IX, I, address);
                 break;
             case 15:
                 // JGE r,x, address[,I]
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
-                this.halted = true;
+                System.out.println("opcode "+opcode+" ,(JGE) is being executed");
+                // this.halted = true;
+                executeJGE(R, IX, I, address);
                 break;
+            case 18:
+                System.out.println("opcode "+opcode+" ,(TRR) is being executed");
+                executeTRR(R, IX);
+                break;
+            // case 25:
+            //     System.out.println("opcode "+opcode+" ,(NOT) is being executed");
+            //     executeNOT(R);
+            //     break;
             default:
                 // Invalid opcode (this opcode is not specified)
                 System.out.println("invalid opcode recieved: "+opcode+" in decimal");   
@@ -469,6 +500,635 @@ public class Simulator {
 				store();
 				this.I.updateDisplay();
 	}
+
+    public void executeJZ(int[] R, int[] IX, int[] I, int[] address){
+        // calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		// int indexingRegister = Utilities.bin2dec(IX);
+		switch (Utilities.bin2dec(IX)) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+            this.halted = true;
+		}   
+
+        // indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		load(); // copies contents in address of MAR to MBR
+		this.I.updateDisplay();
+
+        // int targetRegister = Utilities.bin2dec(R);
+        switch(Utilities.bin2dec(R)){
+            case 0:
+                if (Utilities.bin2dec(this.R0) == 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            case 1:
+                if (Utilities.bin2dec(this.R1) == 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+
+            case 2:
+                if (Utilities.bin2dec(this.R2) == 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            case 3:
+                if (Utilities.bin2dec(this.R3) == 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+
+        }
+    }
+
+    public void executeJNE(int[] R, int[] IX, int[] I, int[] address){
+        // calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		// int indexingRegister = Utilities.bin2dec(IX);
+		switch (Utilities.bin2dec(IX)) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+            this.halted = true;
+		}   
+
+        // indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		load(); // copies contents in address of MAR to MBR
+		this.I.updateDisplay();
+
+        switch(Utilities.bin2dec(R)){
+            case 0:
+                if (Utilities.bin2dec(this.R0) != 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            case 1:
+                if (Utilities.bin2dec(this.R1) != 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+
+            case 2:
+                if (Utilities.bin2dec(this.R2) != 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            case 3:
+                if (Utilities.bin2dec(this.R3) != 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+
+        }
+    }
+
+    public void executeJCC(int[] CC, int[] IX, int[] I, int[] address){
+        // calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		switch (Utilities.bin2dec(IX)) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+            this.halted = true;
+		}   
+
+        // indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		load(); // copies contents in address of MAR to MBR
+		this.I.updateDisplay();
+        System.out.println("input CC --> " + Arrays.toString(CC));
+        int CCBit = Utilities.bin2dec(CC);
+        // System.out.println("target CC --> " +targetCC);
+        if (CCBit == 1){
+            registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+        }
+        else{
+            incrementPC();
+        }
+    }
+
+    public void executeJMA(int[] IX, int[] I, int[] address){
+        // calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		int indexingRegister = Utilities.bin2dec(IX);
+		switch (indexingRegister) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+            this.halted = true;
+		}   
+
+        // indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+
+        registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+    }
+
+    public void executeJGE(int[] R, int[] IX, int[] I, int[] address){
+        // calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		int indexingRegister = Utilities.bin2dec(IX);
+		switch (indexingRegister) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+            this.halted = true;
+		}   
+
+        // indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		load(); // copies contents in address of MAR to MBR
+		this.I.updateDisplay();
+
+        switch(Utilities.bin2dec(R)){
+            case 0:
+                if (Utilities.bin2dec(this.R0) >= 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            case 1:
+                if (Utilities.bin2dec(this.R1) >= 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+
+            case 2:
+                if (Utilities.bin2dec(this.R2) >= 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            case 3:
+                if (Utilities.bin2dec(this.R3) >= 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+
+        }
+    }
+
+    public void executeSOB(int[] R, int[] IX, int[] I, int[] address){
+        // calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		// int indexingRegister = Utilities.bin2dec(IX);
+		switch (Utilities.bin2dec(IX)) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+            this.halted = true;
+		}   
+
+        // indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		load(); // copies contents in address of MAR to MBR
+		this.I.updateDisplay();
+
+        // int targetRegister = Utilities.bin2dec(R);
+        switch(Utilities.bin2dec(R)){
+            case 0:
+                this.R0 = Utilities.dec2bin((Utilities.bin2dec(this.R0) - 1), 16);
+                if (Utilities.bin2dec(this.R0) > 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            case 1:
+                this.R1 = Utilities.dec2bin((Utilities.bin2dec(this.R1) - 1), 16);
+                if (Utilities.bin2dec(this.R1) > 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+
+            case 2:
+                this.R2 = Utilities.dec2bin((Utilities.bin2dec(this.R2) - 1), 16);
+                if (Utilities.bin2dec(this.R2) > 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            case 3:
+                this.R3 = Utilities.dec2bin((Utilities.bin2dec(this.R3) - 1), 16);
+                if (Utilities.bin2dec(this.R3) > 0){
+                    registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                }
+                else{
+                    incrementPC();
+                }
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+
+        }
+    }
+
+    public void executeAMR(int[] R, int[] IX, int[] I, int[] address){
+        // calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		// int indexingRegister = Utilities.bin2dec(IX);
+		switch (Utilities.bin2dec(IX)) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+            this.halted = true;
+		}   
+
+        // indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		load(); // copies contents in address of MAR to MBR
+		this.I.updateDisplay();
+
+        // int targetRegister = Utilities.bin2dec(R);
+        switch(Utilities.bin2dec(R)){
+            case 0:
+                this.R0 = Utilities.dec2bin((Utilities.bin2dec(this.R0) + effectiveAddress), 16);
+                break;
+            case 1:
+                this.R1 = Utilities.dec2bin((Utilities.bin2dec(this.R1) + effectiveAddress), 16);
+                break;
+            case 2:
+                this.R2 = Utilities.dec2bin((Utilities.bin2dec(this.R2) + effectiveAddress), 16);
+                break;
+            case 3:
+                this.R3 = Utilities.dec2bin((Utilities.bin2dec(this.R3) + effectiveAddress), 16);
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+        }
+    }
+
+    public void executeSMR(int[] R, int[] IX, int[] I, int[] address){
+        // calculating effective address
+		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		// int indexingRegister = Utilities.bin2dec(IX);
+		switch (Utilities.bin2dec(IX)) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+            this.halted = true;
+		}   
+
+        // indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
+		load(); // copies contents in address of MAR to MBR
+		this.I.updateDisplay();
+
+        // int targetRegister = Utilities.bin2dec(R);
+        switch(Utilities.bin2dec(R)){
+            case 0:
+                this.R0 = Utilities.dec2bin((Utilities.bin2dec(this.R0) - effectiveAddress), 16);
+                break;
+            case 1:
+                this.R1 = Utilities.dec2bin((Utilities.bin2dec(this.R1) - effectiveAddress), 16);
+                break;
+            case 2:
+                this.R2 = Utilities.dec2bin((Utilities.bin2dec(this.R2) - effectiveAddress), 16);
+                break;
+            case 3:
+                this.R3 = Utilities.dec2bin((Utilities.bin2dec(this.R3) - effectiveAddress), 16);
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+        }
+    }
+
+    public void executeAIR(int[] R, int[] address){
+        if (Utilities.bin2dec(address) == 0){
+            ;
+        }
+        else{
+            switch(Utilities.bin2dec(R)){
+                case 0:
+                    if(Utilities.bin2dec(this.R0) == 0){
+                        this.R0 = Utilities.dec2bin(Utilities.bin2dec(address), 16);
+                    }
+                    else{
+                        this.R0 = Utilities.dec2bin((Utilities.bin2dec(this.R0) + Utilities.bin2dec(address)), 16);
+                    }
+                    break;
+                case 1:
+                    if(Utilities.bin2dec(this.R1) == 0){
+                        this.R1 = Utilities.dec2bin(Utilities.bin2dec(address), 16);
+                    }
+                    else{
+                        this.R1 = Utilities.dec2bin((Utilities.bin2dec(this.R1) + Utilities.bin2dec(address)), 16);
+                    }
+                    break;
+                case 2:
+                    if(Utilities.bin2dec(this.R2) == 0){
+                        this.R2 = Utilities.dec2bin(Utilities.bin2dec(address), 16);
+                    }
+                    else{
+                        this.R2 = Utilities.dec2bin((Utilities.bin2dec(this.R2) + Utilities.bin2dec(address)), 16);
+                    }
+                    break;
+                case 3:
+                    if(Utilities.bin2dec(this.R3) == 0){
+                        this.R3 = Utilities.dec2bin(Utilities.bin2dec(address), 16);
+                    }
+                    else{
+                        this.R3 = Utilities.dec2bin((Utilities.bin2dec(this.R3) + Utilities.bin2dec(address)), 16);
+                    }
+                    break;
+                default:
+                    System.out.println("Unknown register passed");
+                    this.halted = true;
+            }
+        }
+    }
+
+    public void executeSIR(int[] R, int[] address){
+        if (Utilities.bin2dec(address) == 0){
+            ;
+            }
+        else{
+            switch(Utilities.bin2dec(R)){
+                case 0:
+                    if(Utilities.bin2dec(this.R0) == 0){
+                        this.R0 = Utilities.OnesComplement(Utilities.dec2bin(Utilities.bin2dec(address), 16));
+                    }
+                    else{
+                        this.R0 = Utilities.dec2bin((Utilities.bin2dec(this.R0) - Utilities.bin2dec(address)), 16);
+                    }
+                    break;
+                case 1:
+                    if(Utilities.bin2dec(this.R1) == 0){
+                        this.R1 = Utilities.dec2bin(Utilities.bin2dec(address), 16);
+                    }
+                    else{
+                        this.R1 = Utilities.dec2bin((Utilities.bin2dec(this.R1) - Utilities.bin2dec(address)), 16);
+                    }
+                    break;
+                case 2:
+                    if(Utilities.bin2dec(this.R2) == 0){
+                        this.R2 = Utilities.dec2bin(Utilities.bin2dec(address), 16);
+                    }
+                    else{
+                        this.R2 = Utilities.dec2bin((Utilities.bin2dec(this.R2) - Utilities.bin2dec(address)), 16);
+                    }
+                    break;
+                case 3:
+                    if(Utilities.bin2dec(this.R3) == 0){
+                        this.R3 = Utilities.dec2bin(Utilities.bin2dec(address), 16);
+                    }
+                    else{
+                        this.R3 = Utilities.dec2bin((Utilities.bin2dec(this.R3) - Utilities.bin2dec(address)), 16);
+                    }
+                    break;
+                default:
+                    System.out.println("Unknown register passed");
+                    this.halted = true;
+            }
+        }
+    }
+
+    public void executeRFS(int[] address){
+        this.R0 = Utilities.dec2bin(Utilities.bin2dec(address), 16);
+        this.PC = Utilities.dec2bin(Utilities.bin2dec(this.R3), 12);
+    }
+
+    public void executeTRR(int[] R, int[] IX){
+        
+        int[] targetRegister = new int[16];
+        int[] targetIndexRegister = new int[16];
+
+        switch(Utilities.bin2dec(R)){
+            case 0:
+                targetRegister = this.R0;
+            break;
+            case 1:
+                targetRegister = this.R1;
+            break;
+            case 2:
+                targetRegister = this.R2;
+                break;
+            case 3:
+                targetRegister = this.R3;
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+        }
+
+        switch(Utilities.bin2dec(IX)){
+            case 1:
+                targetIndexRegister = this.X1;
+                break;
+            case 2:
+                targetIndexRegister = this.X2;
+                break;
+            case 3:
+                targetIndexRegister = this.X3;
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+        }
+
+        System.out.println("R" + Utilities.bin2dec(R) + " --> "+Arrays.toString(targetRegister));
+        System.out.println("IX" + Utilities.bin2dec(IX) + " --> "+Arrays.toString(targetIndexRegister));
+        
+        if (Utilities.bin2dec(targetRegister) == Utilities.bin2dec(targetIndexRegister)){
+            this.CC = Utilities.dec2bin(1, 4);
+        }
+        else{
+            this.CC = Utilities.dec2bin(0, 4);
+
+        }
+    }
+
 
     /**
      * Loads from memory the contents at the address specified by the MAR into the MBR.
