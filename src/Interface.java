@@ -101,13 +101,13 @@ public class Interface extends JFrame {
         console.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         scroll = new JScrollPane(inputTextArea);
-        textPanel.add(consoleKeyboard, BorderLayout.CENTER);
+        textPanel.add(consoleKeyboard, BorderLayout.WEST);
         textPanel.add(input);
         textPanel.add(Box.createRigidArea(new Dimension(1, 5)));
-        textPanel.add(consolePrinter, BorderLayout.CENTER);
+        textPanel.add(consolePrinter, BorderLayout.WEST);
         textPanel.add(scroll);
         textPanel.add(Box.createRigidArea(new Dimension(1, 5)));
-        textPanel.add(console, BorderLayout.CENTER);
+        textPanel.add(console, BorderLayout.WEST);
         textPanel.add(output);
         
         
