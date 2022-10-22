@@ -218,25 +218,45 @@ public class Simulator {
                 // this.halted = true;
                 executeJGE(R, IX, I, address);
                 break;
+            case 16:
+                System.out.println("opcode "+opcode+" ,(MLT) is being executed");
+                executeMLT(R, IX, I, address);
+                break;
+            case 17:
+                System.out.println("opcode "+opcode+" ,(DVD) is being executed");
+                executeDVD(R, IX, I, address);
+                break;
             case 18:
                 System.out.println("opcode "+opcode+" ,(TRR) is being executed");
                 executeTRR(R, IX);
                 break;
-            case 23:
+            case 19:
                 System.out.println("opcode " + opcode + ",(AND) is being executed");
                 executeAND(R, IX);
                 break;
-            case 24:
+            case 20:
                 System.out.println("opcode " + opcode + ",(OR) is being executed");
                 executeOR(R, IX);
                 break;
-            case 25:
+            case 21:
                 System.out.println("opcode "+opcode+" ,(NOT) is being executed");
                 executeNOT(R);
+                break;
+            case 25:
+                System.out.println("opcode "+opcode+" ,(SRC) is being executed");
+                executeSRC(R, address, IX, I);
+                break;
+            case 26:
+                System.out.println("opcode "+opcode+" ,(RRC) is being executed");
+                executeRRC(R, address, IX, I);
                 break;
             case 49:
                 System.out.println("opcode " + opcode + ",(IN) is being executed");
                 executeIN(R, address);
+                break;
+            case 50:
+                System.out.println("opcode " + opcode + ",(OUT) is being executed");
+                executeOUT(R, address);
                 break;
             default:
                 // Invalid opcode (this opcode is not specified)
@@ -1216,7 +1236,6 @@ public class Simulator {
 
     public void executeIN(int[] R, int[] address){
 
-        // this.R0 = Utilities.dec2bin(this.I.InputDialog(), 16);
         if (Utilities.bin2dec(address) == 0 || Utilities.bin2dec(address) == 2){
             switch(Utilities.bin2dec(R)){
                 case 0:
@@ -1242,6 +1261,272 @@ public class Simulator {
         }
         
     }
+
+    public void executeOUT(int[] R, int[] address){
+        if (Utilities.bin2dec(address) == 1){
+            this.I.output.setText(JOptionPane.showInputDialog(""));
+        }
+        else{
+            this.I.MessageDialog("Wrong Devid buddy.");
+        }
+    }
+
+    private void executeRRC(int[] R, int[] Count, int[] RL, int[] I) {
+    	//decoding the contents of Count
+    	int count = Utilities.bin2dec(Count);
+    	if(count==0)
+    		return;
+		//decoding the contents of R
+    	int r = Utilities.bin2dec(R);
+		int cr = 0;
+		//copying contents of register to cr
+		switch (r) {
+		case 0:
+			cr = Utilities.bin2dec(this.R0);
+			break;
+		case 1:
+			cr = Utilities.bin2dec(this.R1);
+			break;
+		case 2:
+			cr = Utilities.bin2dec(this.R2);
+			break;
+		case 3:
+			cr = Utilities.bin2dec(this.R3);
+			break;
+		default:
+			System.out.println("Unkown register passed in instruction");
+			break;
+		}
+		//if shift == 1 or 3 -> left shift. If shift == 0 or 2 -> right shift
+		int shift = Utilities.bin2dec(RL);
+		int answer;
+		//left shift as L/R == 1
+		if(shift == 1 || shift == 3) {
+			//simply moves each bit to the left by count number of times. 
+			//The low-order bit (the right-most bit) is replaced by the high-order bit (the left-most bit)
+			answer = cr;
+			while(count>0) {
+				int temp = answer<<2;
+				//if(temp == answer*2) => MSB is not set, hence answer = temp
+				if(temp == answer*2) {
+					answer = temp;
+					count--;
+				}
+				//if(temp != answer*2) => MSB is set, set LSB=1
+				else {
+					answer = temp | 1;
+                    count--;
+				}	
+			}
+		}
+		//right shift as L/R == 0
+		else
+		{
+			//simply moves each bit to the right by count number of times. 
+			//the least-significant bit is inserted on the other end. 
+			answer = cr;
+			while(count>0) {
+				int temp = answer>>2;
+				//if(temp == answer/2) => MSB is not set, hence answer = temp
+				if(temp == answer/2) {
+					answer = temp;
+					count--;
+				}
+				//if(temp != answer*2) => MSB is set, set LSB=1
+				else {
+					answer = temp | (int)Math.pow(2,15);
+                    count--;
+				}	
+			}
+		}
+		switch (r) {
+		case 0:
+			updateRegister("R0", Utilities.dec2bin(answer, 16));
+			break;
+		case 1:
+			updateRegister("R1", Utilities.dec2bin(answer, 16));
+			break;
+		case 2:
+			updateRegister("R2", Utilities.dec2bin(answer, 16));;
+			break;
+		case 3:
+			updateRegister("R3", Utilities.dec2bin(answer, 16));
+			break;
+		}
+		return;		
+	}    
+        private void executeSRC(int[] R, int[] Count, int[] RL, int[] I) {
+            //decoding the contents of R
+            int r = Utilities.bin2dec(R);
+            int cr = 0;
+            //copying contents of register to cr
+            switch (r) {
+            case 0:
+                cr = Utilities.bin2dec(this.R0);
+                break;
+            case 1:
+                cr = Utilities.bin2dec(this.R1);
+                break;
+            case 2:
+                cr = Utilities.bin2dec(this.R2);
+                break;
+            case 3:
+                cr = Utilities.bin2dec(this.R3);
+                break;
+            default:
+                System.out.println("Unkown register passed in instruction");
+                break;
+            }
+            //decoding the contents of Count
+            int count = Utilities.bin2dec(Count);
+            //if shift == 1 or 3 -> left shift. If shift == 0 or 2 -> right shift
+            int shift = Utilities.bin2dec(RL);
+            int answer;
+            //left shift
+            if(shift == 1 || shift == 3) {
+                //left shift logically as A/L == 1 && L/R == 1
+                if(shift==3)
+                    //simply moves each bit to the left by count number of times. 
+                    //The low-order bit (the right-most bit) is replaced by a zero bit and
+                    //the high-order bit (the left-most bit) is simply discarded. 
+                    answer = cr << count;	
+                //left shift arithmetically as A/L == 0 && L/R == 1
+                else 
+                    //if the MSB is set then the cr will be greater than 2^15, hence overflow will occur
+                    answer = cr << count;	
+            }
+            //right shift
+            else
+            {
+                //right shift logically as A/L == 1 && L/R == 0
+                if(shift==2) 
+                    //simply moves each bit to the right by count number of times. 
+                    //the least-significant bit is lost and a 0 is inserted on the other end. 
+                    answer = cr >>> count;
+                //right shift arithmetically as A/L == 0 && L/R == 0
+                else
+                    //if the MSB is set then the cr will be greater than 2^15, hence overflow will occur
+                    answer = cr >> count;	
+                
+            }
+            switch (r) {
+            case 0:
+                updateRegister("R0", Utilities.dec2bin(answer, 16));
+                break;
+            case 1:
+                updateRegister("R1", Utilities.dec2bin(answer, 16));
+                break;
+            case 2:
+                updateRegister("R0", Utilities.dec2bin(answer, 16));;
+                break;
+            case 3:
+                updateRegister("R0", Utilities.dec2bin(answer, 16));
+                break;
+            }
+            return;
+        }
+    
+        //function to divide Register by Register
+        private void executeDVD(int[] RX, int[] RY, int[] I, int[] address) {
+            //decoding the contents of R
+            int rx = Utilities.bin2dec(RX);
+            //decoding the contents of IX
+            int ry = Utilities.bin2dec(RY);
+            //loading the of rx,ry to crx,cry respectively, according to the register number
+            int crx=0,cry=0;
+            if((rx==0 || rx==2) && (ry==0 || ry==2)) {
+                if(rx==0)
+                    crx = Utilities.bin2dec(this.R0);//contains contents of R0
+                else
+                    crx = Utilities.bin2dec(this.R2);//contains contents of R2
+                
+                if(ry==0)
+                    cry = Utilities.bin2dec(this.R0);//contains contents of R0
+                else
+                    cry = Utilities.bin2dec(this.R2);//contains contents of R2
+            }
+            //rx & ry must be either R0 or R2, hence exiting the code if data is loaded in wrong registers
+            else {
+                System.out.print("Kindly load the data in register 0 or 2");
+                return;
+            }
+            
+            
+            if(cry!=0) {
+                //calculating the quotient
+                int quotient = crx/cry;
+                //calculating the remainder
+                int remainder = crx%cry;
+                if(rx==0) {
+                    //updating register rx with quotient
+                    updateRegister("R0", Utilities.dec2bin(quotient, 16));
+                    //updating register rx+1 with remainder
+                    updateRegister("R1", Utilities.dec2bin(remainder, 16));
+                }
+                if(rx==2) {
+                    //updating register rx with quotient
+                    updateRegister("R2", Utilities.dec2bin(quotient, 16));
+                    //updating register rx+1 with remainder
+                    updateRegister("R3", Utilities.dec2bin(remainder, 16));
+                }
+                
+            }
+            //contents of ry === 0, setting cc(3) to 1 (set DIVZERO flag)
+            else
+                executeJCC(new int[] {3},RY,I,address);
+                        
+        }
+    
+        //function to multiply Register by Register
+        private void executeMLT(int[] RX, int[] RY, int[] I, int[] address) {
+            //decoding the contents of R
+            int rx = Utilities.bin2dec(RX);
+            //decoding the contents of IX
+            int ry = Utilities.bin2dec(RY);
+            //loading the of rx,ry to crx,cry respectively, according to the register number
+            int crx=0,cry=0;
+            if((rx==0 || rx==2) && (ry==0 || ry==2)) {
+                if(rx==0)
+                    crx = Utilities.bin2dec(this.R0);//contains contents of R0
+                else if(rx==2)
+                    crx = Utilities.bin2dec(this.R2);//contains contents of R2
+                
+                if(ry==0)
+                    cry = Utilities.bin2dec(this.R0);//contains contents of R0
+                else if(ry==2)
+                    cry = Utilities.bin2dec(this.R2);//contains contents of R2
+            }
+            //rx & ry must be either R0 or R2, hence exiting the code if data is loaded in wrong registers
+            else {
+                System.out.print("Kindly load the data in register 0 or 2");
+                return;
+            }
+            //multiplying the contents of rx and ry
+            int result = crx*cry;
+            //as rx&rx+1 has 32 bits in total, maximum value that can be stored == 4,294,967,295
+            if(result< (int)Math.pow(2, 31)-1) {
+                //calculating the high order bits
+                int ch = result/100;
+                //calculating the low order bits
+                int cl = result%100;
+                if(rx==0) {
+                    //updating register rx with high order bits--ch
+                    updateRegister("R0", Utilities.dec2bin(ch, 16));
+                    //updating register rx+1 with high order bits--cl
+                    updateRegister("R1", Utilities.dec2bin(cl, 16));
+                }
+                if(rx==2) {
+                    //updating register rx with high order bits--ch
+                    updateRegister("R2", Utilities.dec2bin(ch, 16));
+                    //updating register rx+1 with high order bits--cl
+                    updateRegister("R3", Utilities.dec2bin(cl, 16));
+                }
+                
+            }
+            //if result is greater than 4,294,967,295, setting the overflow flag 
+            else
+                executeJCC(new int[]{0},RY,I,address);
+        }
 
     /**
      * Loads from memory the contents at the address specified by the MAR into the MBR.

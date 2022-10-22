@@ -10,15 +10,13 @@ import javax.swing.border.EmptyBorder;
  */
 public class Interface extends JFrame {
     /** The different panels which makes up the JFrame for the graphical user interface. */
-    JPanel rPanel;
-    JPanel mPanel;
-    JPanel bPanel;    
-    JPanel hPanel;
-
+    JPanel regPanel, memRegPanel, buttonPanel, textPanel, topPanel;
+    JLabel consoleKeyboard, consolePrinter, console;
+    JSplitPane splitPane;
+    JScrollPane scroll;
     JTextField input = createTextField();
-    JTextField inputHolder = createTextField();
-    JTextArea inputedDataArea = createTextArea(100, 1);
-    JTextArea output = createTextArea(5, 1);
+    JTextArea inputTextArea = createTextArea(100, 1);
+    JTextArea output = createTextArea(50, 1);
 
 
     /** A simulator for this interace to interact with and display. */
@@ -51,50 +49,69 @@ public class Interface extends JFrame {
         int w = 1920;
         int h = 1080;
         this.setSize(w,h);
+        this.setLayout(new GridLayout());
         // this.getContentPane().setBackground(new Color(40, 40, 40));
-        rPanel = new JPanel(new GridLayout(10, 1, 5, 5));
-        // rPanel.setBackground(new Color(40, 40, 40));
 
-        mPanel = new JPanel(new GridLayout(10, 1, 5, 5));
-        // mPanel.setBackground(new Color(40, 40, 40));
+        topPanel = new JPanel();
+        topPanel.setLayout(new BorderLayout());
 
-        bPanel = new JPanel();
-        // bPanel.setBackground(new Color(40, 40, 40));
+        regPanel = new JPanel(new GridLayout(0, 1, 5, 5));
+        // regPanel.setBackground(new Color(40, 40, 40));
 
-        hPanel = new JPanel();
-        // hPanel.setLayout(new FlowLayout());
-        // hPanel.setLayout();
-        hPanel.setLayout(new BoxLayout(hPanel, BoxLayout.Y_AXIS));
+        memRegPanel = new JPanel(new GridLayout(0, 1, 5, 5));
+        // memRegPanel.setBackground(new Color(40, 40, 40));
 
-        this.setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
+        buttonPanel = new JPanel();
+        // buttonPanel.setBackground(new Color(40, 40, 40));
+
+        textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
+        // textPanel.setBackground(new Color(40, 40, 40));
        
         // Set the simulator instance for this interface
         this.S = S;
 
         // Create registers
-        rRegisters = addRegisters(this.S, rPanel, R_NAMES, R_SIZES);
-        mRegisters = addRegisters(this.S, mPanel, M_NAMES, M_SIZES);
+        rRegisters = addRegisters(this.S, regPanel, R_NAMES, R_SIZES);
+        mRegisters = addRegisters(this.S, memRegPanel, M_NAMES, M_SIZES);
 
         // Create controls
         addControls();
 
 
-        mPanel.add(bPanel);
-        mPanel.add(hPanel);
+        memRegPanel.add(buttonPanel);
+ 
+        topPanel.add(regPanel, BorderLayout.WEST);
+        topPanel.add(memRegPanel, BorderLayout.EAST);
 
-        
-        this.add(rPanel);
-        this.add(mPanel);
+        splitPane = new JSplitPane();
+        splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);  
+        splitPane.setDividerLocation(800);                    
+        splitPane.setTopComponent(topPanel);                  
+        splitPane.setBottomComponent(textPanel); 
 
-        JScrollPane scroll = new JScrollPane(inputedDataArea);
+        consolePrinter = new JLabel("Console Printer");
+        // consolePrinter.setLabelFor(output);
+        consolePrinter.setAlignmentX(Component.LEFT_ALIGNMENT);
+        consoleKeyboard = new JLabel("Console Keyboard");
+        // consoleKeyboard.setLabelFor(input);
+        consoleKeyboard.setAlignmentX(Component.LEFT_ALIGNMENT);
+        console = new JLabel("Console");
+        // console.setLabelFor(inputTextArea);
+        console.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        hPanel.add(input);
-        hPanel.add(Box.createRigidArea(new Dimension(1, 5)));
-        hPanel.add(scroll);
-        hPanel.add(Box.createRigidArea(new Dimension(1, 5)));
-        hPanel.add(output);
-
+        scroll = new JScrollPane(inputTextArea);
+        textPanel.add(consoleKeyboard, BorderLayout.CENTER);
+        textPanel.add(input);
+        textPanel.add(Box.createRigidArea(new Dimension(1, 5)));
+        textPanel.add(consolePrinter, BorderLayout.CENTER);
+        textPanel.add(scroll);
+        textPanel.add(Box.createRigidArea(new Dimension(1, 5)));
+        textPanel.add(console, BorderLayout.CENTER);
+        textPanel.add(output);
         
+        
+        this.add(splitPane);
         // Set visibile
         this.setVisible(true);
         // pack();
@@ -112,32 +129,25 @@ public class Interface extends JFrame {
         }
         return registers;
     }
-    // public Register[] addRegisters() {
-    //     Register[] registers = new Register[REG_NAMES.length];
-    //     for (int i = 0; i < REG_NAMES.length; i++) {
-    //         registers[i] = new Register(this.S, this.panel, REG_NAMES[i], REG_SIZES[i]);
-    //     }
-    //     return registers;
-    // }
 
     /**
      * Adds other controls to the user interface like a "step" button. 
      */
     public void addControls() {
         // Create a single step button that executes the next instruction (and increments the PC, et cetera)
-        bPanel.add(createStepButton());
+        buttonPanel.add(createStepButton());
 
         // Create a load button that loads into the MBR the value at the MAR address in memory
-        bPanel.add(createLoadButton());
+        buttonPanel.add(createLoadButton());
 
         // Create a store button that stores into the memory at address MAR the value in MBR
-        bPanel.add(createStoreButton());
+        buttonPanel.add(createStoreButton());
         
         // Create a store button that stores into the memory at address MAR the value in MBR
-        bPanel.add(createInitButton());
+        buttonPanel.add(createInitButton());
 
         // Create a store button that stores into the memory at address MAR the value in MBR
-        bPanel.add(createRunButton());
+        buttonPanel.add(createRunButton());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -147,24 +157,6 @@ public class Interface extends JFrame {
         this.panel.add(new JButton("Privileged"));// for later phase
         */
     }
-    // public void addControls() {
-    //     // Create a single step button that executes the next instruction (and increments the PC, et cetera)
-    //     this.panel.add(createStepButton());
-
-    //     // Create a load button that loads into the MBR the value at the MAR address in memory
-    //     this.panel.add(createLoadButton());
-
-    //     // Create a store button that stores into the memory at address MAR the value in MBR
-    //     this.panel.add(createStoreButton());
-
-    //     /*
-    //     this.panel.add(new JButton("Store"));// stores MBR values at MAR address
-    //     this.panel.add(new JButton("IPL"));// init (allows you to choose file to load into memory) 
-    //     this.panel.add(new JButton("Run"));// runs until a halt occurs
-    //     this.panel.add(new JButton("Halt"));// indicates whether halted or not (not input)
-    //     this.panel.add(new JButton("Privileged"));// for later phase
-    //     */
-    // }
     
     /**
      * Creates single step button for panel.
@@ -278,8 +270,7 @@ public class Interface extends JFrame {
         input.addActionListener(new TextFieldListener(){
             public void actionPerformed(ActionEvent e) {
                 String inputString = input.getText();
-                inputHolder.setText(inputString);
-                inputedDataArea.append(inputString + "\n");
+                inputTextArea.append(inputString + "\n");
                 input.setText("");
             }
             
