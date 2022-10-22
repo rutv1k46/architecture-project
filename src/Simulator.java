@@ -222,10 +222,22 @@ public class Simulator {
                 System.out.println("opcode "+opcode+" ,(TRR) is being executed");
                 executeTRR(R, IX);
                 break;
-            // case 25:
-            //     System.out.println("opcode "+opcode+" ,(NOT) is being executed");
-            //     executeNOT(R);
-            //     break;
+            case 23:
+                System.out.println("opcode " + opcode + ",(AND) is being executed");
+                executeAND(R, IX);
+                break;
+            case 24:
+                System.out.println("opcode " + opcode + ",(OR) is being executed");
+                executeOR(R, IX);
+                break;
+            case 25:
+                System.out.println("opcode "+opcode+" ,(NOT) is being executed");
+                executeNOT(R);
+                break;
+            case 49:
+                System.out.println("opcode " + opcode + ",(IN) is being executed");
+                executeIN(R, address);
+                break;
             default:
                 // Invalid opcode (this opcode is not specified)
                 System.out.println("invalid opcode recieved: "+opcode+" in decimal");   
@@ -1129,6 +1141,107 @@ public class Simulator {
         }
     }
 
+    public void executeAND(int[] R, int[] IX){
+        int[][] targetRegisters = {this.R0, this.R1, this.R2, this.R3};
+        int[][] targetIndexRegisters = {this.X1, this.X2, this.X3};
+        int r = Utilities.bin2dec(R);
+        int ix = Utilities.bin2dec(IX);
+
+        switch(r){
+            case 0:
+                this.R0 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) & Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
+                break;
+            case 1:
+                this.R1 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) & Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
+                break;
+            case 2:
+                this.R2 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) & Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
+                break;
+            case 3:
+                this.R3 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) & Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+        }     
+    } 
+
+    public void executeOR(int[] R, int[] IX){
+        int[][] targetRegisters = {this.R0, this.R1, this.R2, this.R3};
+        int[][] targetIndexRegisters = {this.X1, this.X2, this.X3};
+        int r = Utilities.bin2dec(R);
+        int ix = Utilities.bin2dec(IX);
+
+        switch(r){
+            case 0:
+                this.R0 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) | Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
+                break;
+            case 1:
+                this.R1 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) | Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
+                break;
+            case 2:
+                this.R2 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) | Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
+                break;
+            case 3:
+                this.R3 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) | Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+        }     
+    } 
+
+    public void executeNOT(int[] R){
+        // int[][] targetRegisters = {this.R0, this.R1, this.R2, this.R3};
+        // int[][] targetIndexRegisters = {this.X1, this.X2, this.X3};
+
+        switch(Utilities.bin2dec(R)){
+            case 0:
+                this.R0 = Utilities.OnesComplement(this.R0);
+                break;
+            case 1:
+                this.R1 = Utilities.OnesComplement(this.R1);
+                break;
+            case 2:
+                this.R2 = Utilities.OnesComplement(this.R2);
+                break;
+            case 3:
+                this.R3 = Utilities.OnesComplement(this.R3);
+                break;
+            default:
+                System.out.println("Unknown register passed");
+                this.halted = true;
+        } 
+    }
+
+    public void executeIN(int[] R, int[] address){
+
+        // this.R0 = Utilities.dec2bin(this.I.InputDialog(), 16);
+        if (Utilities.bin2dec(address) == 0 || Utilities.bin2dec(address) == 2){
+            switch(Utilities.bin2dec(R)){
+                case 0:
+                    this.R0 = Utilities.dec2bin(this.I.InputDialog(), 16);
+                    break;
+                case 1:
+                    this.R1 = Utilities.dec2bin(this.I.InputDialog(), 16);
+                    break;
+                case 2:
+                    this.R2 = Utilities.dec2bin(this.I.InputDialog(), 16);
+                    break;
+                case 3:
+                    this.R3 = Utilities.dec2bin(this.I.InputDialog(), 16);
+                    break;
+                default:
+                    System.out.println("Unknown register passed");
+                    this.halted = true;
+            } 
+        }
+
+        else{
+            this.I.MessageDialog("Wrong Devid buddy.");
+        }
+        
+    }
 
     /**
      * Loads from memory the contents at the address specified by the MAR into the MBR.

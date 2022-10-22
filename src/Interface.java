@@ -15,6 +15,12 @@ public class Interface extends JFrame {
     JPanel bPanel;    
     JPanel hPanel;
 
+    JTextField input = createTextField();
+    JTextField inputHolder = createTextField();
+    JTextArea inputedDataArea = createTextArea(100, 1);
+    JTextArea output = createTextArea(5, 1);
+
+
     /** A simulator for this interace to interact with and display. */
     Simulator S;
     
@@ -45,7 +51,7 @@ public class Interface extends JFrame {
         int w = 1920;
         int h = 1080;
         this.setSize(w,h);
-        this.getContentPane().setBackground(new Color(40, 40, 40));
+        // this.getContentPane().setBackground(new Color(40, 40, 40));
         rPanel = new JPanel(new GridLayout(10, 1, 5, 5));
         // rPanel.setBackground(new Color(40, 40, 40));
 
@@ -56,7 +62,9 @@ public class Interface extends JFrame {
         // bPanel.setBackground(new Color(40, 40, 40));
 
         hPanel = new JPanel();
-
+        // hPanel.setLayout(new FlowLayout());
+        // hPanel.setLayout();
+        hPanel.setLayout(new BoxLayout(hPanel, BoxLayout.Y_AXIS));
 
         this.setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
        
@@ -78,9 +86,18 @@ public class Interface extends JFrame {
         this.add(rPanel);
         this.add(mPanel);
 
+        JScrollPane scroll = new JScrollPane(inputedDataArea);
+        
+        hPanel.add(input);
+        hPanel.add(Box.createRigidArea(new Dimension(1, 5)));
+        hPanel.add(scroll);
+        hPanel.add(Box.createRigidArea(new Dimension(1, 5)));
+        hPanel.add(output);
+
+        
         // Set visibile
         this.setVisible(true);
-        pack();
+        // pack();
     }
 
     /**
@@ -120,7 +137,7 @@ public class Interface extends JFrame {
         bPanel.add(createInitButton());
 
         // Create a store button that stores into the memory at address MAR the value in MBR
-        hPanel.add(createRunButton());
+        bPanel.add(createRunButton());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -253,6 +270,32 @@ public class Interface extends JFrame {
         return button;
     }
 
+    public JTextField createTextField(){
+        JTextField input = new JTextField(1);
+        input.setText("");
+        input.requestFocus();        // start with focus on this field
+
+        input.addActionListener(new TextFieldListener(){
+            public void actionPerformed(ActionEvent e) {
+                String inputString = input.getText();
+                inputHolder.setText(inputString);
+                inputedDataArea.append(inputString + "\n");
+                input.setText("");
+            }
+            
+        });
+
+        return input;
+    }
+
+    public JTextArea createTextArea(int row, int col) {
+        // Interface I = new Interface(S);
+        JTextArea output = new JTextArea(row, col);
+        output.setEditable(false);
+
+        return output;
+    }
+
     /**
      * Updates the display based on the values in the simulator S
      */
@@ -268,7 +311,23 @@ public class Interface extends JFrame {
 
         // Update other things... in the future
     }
+
+    public int InputDialog(){
+        int m = Integer.parseInt(JOptionPane.showInputDialog(""));
+        System.out.println(m);
+        return m;
+    }
+
+    public void MessageDialog(String str){
+        JOptionPane.showMessageDialog(this, str);
+    }
 }
+
+class TextFieldListener implements ActionListener {  
+    public TextFieldListener(){}
+    
+    public void actionPerformed(ActionEvent e){}
+   }
 
 /** 
  * A simple action listener class for various buttons in the interface that has the simulator as a field so that actions can be responded to by calling simulator functions.
