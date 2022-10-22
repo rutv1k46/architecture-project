@@ -11,7 +11,6 @@ public class Utilities {
      * 
      * @return the decimal number 
      */
-    @Deprecated
     public static int bin2dec(int[] a) {
         int r = 0;
         for (int i = a.length - 1; i >= 1; i--) {
@@ -19,22 +18,6 @@ public class Utilities {
         }
         if (a[0] == 1) {
             r *= -1;
-        }
-        return r;
-    }
-
-    /** 
-     * Converts a positive only binary number to a decimal number taking input as an integer array as is standard in this simulator. 
-     * 
-     * @param a the integer array in binary (all zeros and ones) to be converted
-     * 
-     * @return the decimal number 
-     */
-    @Deprecated
-    public static int bin2decDirect(int[] a) {
-        int r = 0;
-        for (int i = a.length - 1; i >= 0; i--) {
-            r += a[i] * Math.pow(2, (a.length - 1 - i));
         }
         return r;
     }
@@ -75,27 +58,6 @@ public class Utilities {
              }
              return v;
         }
-    }
-
-    /**
-     * Converts a decimal number to binary directly, assuming just a positive number
-     * 
-     * @param a the decimal number to be converted
-     * @param size the number of desired bits in the converted binary number that gets returned
-     * 
-     * @return -1 if size is not sufficient to store the value of a and otherwise returns the converted-to-binary version as an int array of zeros and ones
-     */
-    @Deprecated
-    public static int[] dec2binDirect(int a, int size) {
-        int[] v = new int[size];
-        for (int i = 0; i < size; i++) {
-            if (a - Math.pow(2, size - 1 - i) >= 0) {
-                v[i] = 1;
-                a -= Math.pow(2, size - 1 - i);
-            }
-        }
-        
-        return v;
     }
     
     public static int[] hex2bin(String hex, int size){
