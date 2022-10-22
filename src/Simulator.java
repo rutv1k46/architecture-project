@@ -1146,7 +1146,7 @@ public class Simulator {
      * Stores in memory the contents in MBR at the address specified by the MAR.
      */
     public void store() {
-        this.M.set(Utilities.bin2deNegative(this.MAR), this.MBR);
+        this.M.set(Utilities.bin2decNegative(this.MAR), this.MBR);
         // Notify the interface that changes may have been made
         this.I.updateDisplay();
     }
