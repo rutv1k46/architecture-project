@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import javax.swing.border.EmptyBorder;
+import java.util.*;
 /**
  * A graphical user interface for using the simulated computer
  */
@@ -17,6 +18,10 @@ public class Interface extends JFrame {
     JTextField input = createTextField();
     JTextArea inputTextArea = createTextArea(100, 1);
     JTextArea output = createTextArea(50, 1);
+    ArrayList<String> p1_input = new ArrayList<String>();
+    int count = 0;
+    int inputSize = 20;
+    boolean p1_flag, allowInput = false;
 
 
     /** A simulator for this interace to interact with and display. */
@@ -86,7 +91,7 @@ public class Interface extends JFrame {
 
         splitPane = new JSplitPane();
         splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);  
-        splitPane.setDividerLocation(800);                    
+        splitPane.setDividerLocation(700);                    
         splitPane.setTopComponent(topPanel);                  
         splitPane.setBottomComponent(textPanel); 
 
@@ -148,6 +153,7 @@ public class Interface extends JFrame {
 
         // Create a store button that stores into the memory at address MAR the value in MBR
         buttonPanel.add(createRunButton());
+        buttonPanel.add(createProgram_1Button());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -262,6 +268,24 @@ public class Interface extends JFrame {
         return button;
     }
 
+    public JButton createProgram_1Button() {
+        // Create the single step button
+        JButton button = new JButton("Program 1");
+        button.setPreferredSize((new Dimension(100,50)));
+        button.setFocusable(false);
+
+        // Add an action listener that can call the simulator's step function upon this button being clicked
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                p1_flag = true;
+                allowInput = true;
+            }
+        });
+
+        // Return this button
+        return button;
+    }
+
     public JTextField createTextField(){
         JTextField input = new JTextField(1);
         input.setText("");
@@ -269,9 +293,22 @@ public class Interface extends JFrame {
 
         input.addActionListener(new TextFieldListener(){
             public void actionPerformed(ActionEvent e) {
-                String inputString = input.getText();
-                inputTextArea.append(inputString + "\n");
-                input.setText("");
+                if(allowInput){
+                    String inputString = input.getText();
+                    p1_input.add(input.getText());
+                    inputTextArea.append(inputString + "\n");
+                    input.setText("");
+                    if (p1_flag){
+                        count+=1;
+                        if(count == inputSize){
+                            count = 0;
+                            progrm_1();
+                        }
+                    }
+                }
+                else{
+                    MessageDialog("To input data you must either give IN/OUT instruction or use the Program 1 button.");
+                }
             }
             
         });
@@ -285,6 +322,26 @@ public class Interface extends JFrame {
         output.setEditable(false);
 
         return output;
+    }
+
+    public void progrm_1(){
+        int[] input = new int[inputSize]; 
+        for (int i = 0; i < input.length; i++) {
+            input[i] = Integer.parseInt(p1_input.get(i), 16);            
+            // input[i] = Integer.parseInt(in.nextLine(), 16);            
+        }
+        // PrintInput(input);
+
+        output.setText("what number do you wanna search? ");
+        // System.out.println("what number do you wanna search? ");
+        String search = JOptionPane.showInputDialog("what number do you wanna search?");
+        // in.close();
+        Arrays.sort(input);
+        int closestNumber = Utilities.findClosest(input, Integer.parseInt(search, 16));
+        // System.out.println("Searching "+ search + "... \n" + "Yay! found something, here you go " + Integer.toHexString(closestNumber));
+        output.setText("Searching "+ search + "... \n" + "Yay! found something, here you go " + Integer.toHexString(closestNumber) + " (hex)");
+        p1_flag = false;
+        allowInput = false;
     }
 
     /**

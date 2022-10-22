@@ -197,8 +197,9 @@ public class Simulator {
                 break;
             case 12:
                 // JSR x, address[,I] 
-                System.out.println("opcode "+opcode+" was given but is not yet implemented");
-                this.halted = true;
+                System.out.println("opcode "+opcode+" ,(JSR) is being executed");
+                // this.halted = true;
+                executeJSR(R, IX, I, address);
                 break;
             case 13:
                 // RFS Immed 
@@ -253,10 +254,12 @@ public class Simulator {
             case 49:
                 System.out.println("opcode " + opcode + ",(IN) is being executed");
                 executeIN(R, address);
+                this.I.allowInput = false;
                 break;
             case 50:
                 System.out.println("opcode " + opcode + ",(OUT) is being executed");
                 executeOUT(R, address);
+                this.I.allowInput = false;
                 break;
             default:
                 // Invalid opcode (this opcode is not specified)
@@ -533,11 +536,11 @@ public class Simulator {
 				this.I.updateDisplay();
 	}
 
+    // instruction for jump if zero
     public void executeJZ(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
 		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
-		// int indexingRegister = Utilities.bin2dec(IX);
 		switch (Utilities.bin2dec(IX)) {
 		// c(iX)
 		case 0:
@@ -566,14 +569,15 @@ public class Simulator {
 		load(); // copies contents in address of MAR to MBR
 		this.I.updateDisplay();
 
-        // int targetRegister = Utilities.bin2dec(R);
+        // if c(r) = 0 then copy the effective address to the PC
+        //else increment PC
         switch(Utilities.bin2dec(R)){
             case 0:
                 if (Utilities.bin2dec(this.R0) == 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             case 1:
@@ -581,7 +585,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
 
@@ -590,7 +594,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             case 3:
@@ -598,7 +602,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             default:
@@ -608,11 +612,11 @@ public class Simulator {
         }
     }
 
+    //instruction for jump if not equal
     public void executeJNE(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
 		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
-		// int indexingRegister = Utilities.bin2dec(IX);
 		switch (Utilities.bin2dec(IX)) {
 		// c(iX)
 		case 0:
@@ -641,13 +645,15 @@ public class Simulator {
 		load(); // copies contents in address of MAR to MBR
 		this.I.updateDisplay();
 
+        // if c(r) !=0 then copy effective address to the PC
+        // else increment PC
         switch(Utilities.bin2dec(R)){
             case 0:
                 if (Utilities.bin2dec(this.R0) != 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             case 1:
@@ -655,7 +661,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
 
@@ -664,7 +670,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             case 3:
@@ -672,7 +678,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             default:
@@ -682,6 +688,7 @@ public class Simulator {
         }
     }
 
+    //instruction for jump if condition code
     public void executeJCC(int[] CC, int[] IX, int[] I, int[] address){
         // calculating effective address
 		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
@@ -713,17 +720,20 @@ public class Simulator {
 		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
 		load(); // copies contents in address of MAR to MBR
 		this.I.updateDisplay();
-        System.out.println("input CC --> " + Arrays.toString(CC));
+
         int CCBit = Utilities.bin2dec(CC);
-        // System.out.println("target CC --> " +targetCC);
+
+        // if cc bit = 1 then copy effective address to the PC
+        //else increment PC
         if (CCBit == 1){
             registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
         }
         else{
-            incrementPC();
+            ;
         }
     }
 
+    // instruction for unconditional jump to address
     public void executeJMA(int[] IX, int[] I, int[] address){
         // calculating effective address
 		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
@@ -754,9 +764,11 @@ public class Simulator {
 			effectiveAddress = Utilities.bin2dec(this.MBR);
 		}
 
+        // copying effective address to the PC for the jump
         registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
     }
 
+    // instruction for jump if greater than or equal to
     public void executeJGE(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
 		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
@@ -790,13 +802,15 @@ public class Simulator {
 		load(); // copies contents in address of MAR to MBR
 		this.I.updateDisplay();
 
+        // if c(r) >= 0 then copy effective address to the PC
+        // else increment PC
         switch(Utilities.bin2dec(R)){
             case 0:
                 if (Utilities.bin2dec(this.R0) >= 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             case 1:
@@ -804,7 +818,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
 
@@ -813,7 +827,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             case 3:
@@ -821,7 +835,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             default:
@@ -831,6 +845,7 @@ public class Simulator {
         }
     }
 
+    // instruction for subtract one and branch
     public void executeSOB(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
 		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
@@ -864,7 +879,9 @@ public class Simulator {
 		load(); // copies contents in address of MAR to MBR
 		this.I.updateDisplay();
 
-        // int targetRegister = Utilities.bin2dec(R);
+        // r = c(r) - 1
+        // if c(r) > 0 then copy effective address to the PC
+        // else increment PC
         switch(Utilities.bin2dec(R)){
             case 0:
                 this.R0 = Utilities.dec2bin((Utilities.bin2dec(this.R0) - 1), 16);
@@ -872,7 +889,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             case 1:
@@ -881,7 +898,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
 
@@ -891,7 +908,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             case 3:
@@ -900,7 +917,7 @@ public class Simulator {
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
                 }
                 else{
-                    incrementPC();
+                    ;
                 }
                 break;
             default:
@@ -910,6 +927,7 @@ public class Simulator {
         }
     }
 
+    // instruction for add memory to register 
     public void executeAMR(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
 		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
@@ -943,7 +961,7 @@ public class Simulator {
 		load(); // copies contents in address of MAR to MBR
 		this.I.updateDisplay();
 
-        // int targetRegister = Utilities.bin2dec(R);
+        // r = c(r) + c(effective address)
         switch(Utilities.bin2dec(R)){
             case 0:
                 this.R0 = Utilities.dec2bin((Utilities.bin2dec(this.R0) + effectiveAddress), 16);
@@ -963,6 +981,7 @@ public class Simulator {
         }
     }
 
+    // instruction for subtract memory from the register
     public void executeSMR(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
 		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
@@ -996,7 +1015,7 @@ public class Simulator {
 		load(); // copies contents in address of MAR to MBR
 		this.I.updateDisplay();
 
-        // int targetRegister = Utilities.bin2dec(R);
+        // r = c(r) + c(effective address)
         switch(Utilities.bin2dec(R)){
             case 0:
                 this.R0 = Utilities.dec2bin((Utilities.bin2dec(this.R0) - effectiveAddress), 16);
@@ -1016,7 +1035,13 @@ public class Simulator {
         }
     }
 
+    // instruction for add immediate to the register
     public void executeAIR(int[] R, int[] address){
+        
+        // if immediate = 0 then do nothing
+        // else
+            // if c(r) = 0 then load register with immediate
+            // else r = c(r) + immediate
         if (Utilities.bin2dec(address) == 0){
             ;
         }
@@ -1061,10 +1086,16 @@ public class Simulator {
         }
     }
 
+    // instruction for subtract immediate form the register
     public void executeSIR(int[] R, int[] address){
+
+        // if immediate = 0 then do nothing
+        // else
+            // if c(r) = 0 then load register with -(immediate)
+            // else r = c(r) - immediate
         if (Utilities.bin2dec(address) == 0){
             ;
-            }
+        }
         else{
             switch(Utilities.bin2dec(R)){
                 case 0:
@@ -1106,16 +1137,22 @@ public class Simulator {
         }
     }
 
+    // instruction for return from subroutine 
     public void executeRFS(int[] address){
+
+        // r0 = immediate
+        // PC = c(r3)
         this.R0 = Utilities.dec2bin(Utilities.bin2dec(address), 16);
         this.PC = Utilities.dec2bin(Utilities.bin2dec(this.R3), 12);
     }
 
+    // instruction for test the equality of registers
     public void executeTRR(int[] R, int[] IX){
-        
+
         int[] targetRegister = new int[16];
         int[] targetIndexRegister = new int[16];
 
+        // determine GPR
         switch(Utilities.bin2dec(R)){
             case 0:
                 targetRegister = this.R0;
@@ -1134,6 +1171,7 @@ public class Simulator {
                 this.halted = true;
         }
 
+        // determine index register
         switch(Utilities.bin2dec(IX)){
             case 1:
                 targetIndexRegister = this.X1;
@@ -1148,12 +1186,11 @@ public class Simulator {
                 System.out.println("Unknown register passed");
                 this.halted = true;
         }
-
-        System.out.println("R" + Utilities.bin2dec(R) + " --> "+Arrays.toString(targetRegister));
-        System.out.println("IX" + Utilities.bin2dec(IX) + " --> "+Arrays.toString(targetIndexRegister));
         
+        // if c(rx) = c(ry) then cc(4) = 1
+        // else set cc(4) = 0
         if (Utilities.bin2dec(targetRegister) == Utilities.bin2dec(targetIndexRegister)){
-            this.CC = Utilities.dec2bin(1, 4);
+            this.CC = Utilities.dec2bin(8, 4);
         }
         else{
             this.CC = Utilities.dec2bin(0, 4);
@@ -1161,12 +1198,16 @@ public class Simulator {
         }
     }
 
+    // instruction for logical and on registers
     public void executeAND(int[] R, int[] IX){
+
+        // here we're using R and IX to pass two register from the IR 
         int[][] targetRegisters = {this.R0, this.R1, this.R2, this.R3};
         int[][] targetIndexRegisters = {this.X1, this.X2, this.X3};
         int r = Utilities.bin2dec(R);
         int ix = Utilities.bin2dec(IX);
 
+        // performing logical and on R and IX
         switch(r){
             case 0:
                 this.R0 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) & Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
@@ -1186,12 +1227,16 @@ public class Simulator {
         }     
     } 
 
+    // instruction for logical or
     public void executeOR(int[] R, int[] IX){
+
+        // here we're using R and IX to pass two register from the IR 
         int[][] targetRegisters = {this.R0, this.R1, this.R2, this.R3};
         int[][] targetIndexRegisters = {this.X1, this.X2, this.X3};
         int r = Utilities.bin2dec(R);
         int ix = Utilities.bin2dec(IX);
 
+        // performing logical or on R and IX
         switch(r){
             case 0:
                 this.R0 = Utilities.dec2bin((Utilities.bin2dec(targetRegisters[r]) | Utilities.bin2dec(targetIndexRegisters[ix-1])), 16);
@@ -1211,10 +1256,10 @@ public class Simulator {
         }     
     } 
 
+    // instruction for logical not
     public void executeNOT(int[] R){
-        // int[][] targetRegisters = {this.R0, this.R1, this.R2, this.R3};
-        // int[][] targetIndexRegisters = {this.X1, this.X2, this.X3};
 
+        // performing logical not on register
         switch(Utilities.bin2dec(R)){
             case 0:
                 this.R0 = Utilities.OnesComplement(this.R0);
@@ -1234,21 +1279,27 @@ public class Simulator {
         } 
     }
 
+    // instruction for in
     public void executeIN(int[] R, int[] address){
 
+        // setting the flag to allow input from the console keyboard 
+        this.I.allowInput = true;
+
+        // checking if devid is either 0 or 2, if yes then take input from the console keyboard
+        // else deny input
         if (Utilities.bin2dec(address) == 0 || Utilities.bin2dec(address) == 2){
             switch(Utilities.bin2dec(R)){
                 case 0:
-                    this.R0 = Utilities.dec2bin(this.I.InputDialog(), 16);
+                    this.R0 = Utilities.hex2bin(JOptionPane.showInputDialog(""), 16);
                     break;
                 case 1:
-                    this.R1 = Utilities.dec2bin(this.I.InputDialog(), 16);
+                    this.R1 = Utilities.hex2bin(JOptionPane.showInputDialog(""), 16);
                     break;
                 case 2:
-                    this.R2 = Utilities.dec2bin(this.I.InputDialog(), 16);
+                    this.R2 = Utilities.hex2bin(JOptionPane.showInputDialog(""), 16);
                     break;
                 case 3:
-                    this.R3 = Utilities.dec2bin(this.I.InputDialog(), 16);
+                    this.R3 = Utilities.hex2bin(JOptionPane.showInputDialog(""), 16);
                     break;
                 default:
                     System.out.println("Unknown register passed");
@@ -1257,20 +1308,31 @@ public class Simulator {
         }
 
         else{
-            this.I.MessageDialog("Wrong Devid buddy.");
+            this.I.MessageDialog("Wrong Devid");
         }
         
     }
 
+    // instruction for out
     public void executeOUT(int[] R, int[] address){
+
+        // setting the flag to allow input from the console keyboard
+        this.I.allowInput = true;
+
+        // if devid = 1 then allow input and output whatever the user enter onto the console printer
+        // else deny input
         if (Utilities.bin2dec(address) == 1){
             this.I.output.setText(JOptionPane.showInputDialog(""));
         }
         else{
-            this.I.MessageDialog("Wrong Devid buddy.");
+            this.I.MessageDialog("Wrong Devid");
         }
     }
 
+    /**
+	 * Rotates the contents of a register. The value to be shifted is stored in cr. The number of shifts is in count. 
+	 * If left shifting, then shift should hold a value of 1 or 3. If right shifting is specified, then shift should be 0 or 2.
+	 */
     private void executeRRC(int[] R, int[] Count, int[] RL, int[] I) {
     	//decoding the contents of Count
     	int count = Utilities.bin2dec(Count);
@@ -1301,44 +1363,18 @@ public class Simulator {
 		int shift = Utilities.bin2dec(RL);
 		int answer;
 		//left shift as L/R == 1
-		if(shift == 1 || shift == 3) {
+		if(shift == 1 || shift == 3)
 			//simply moves each bit to the left by count number of times. 
 			//The low-order bit (the right-most bit) is replaced by the high-order bit (the left-most bit)
-			answer = cr;
-			while(count>0) {
-				int temp = answer<<2;
-				//if(temp == answer*2) => MSB is not set, hence answer = temp
-				if(temp == answer*2) {
-					answer = temp;
-					count--;
-				}
-				//if(temp != answer*2) => MSB is set, set LSB=1
-				else {
-					answer = temp | 1;
-                    count--;
-				}	
-			}
-		}
+			answer = (cr << count) | (cr >> (16 - count));
+		
 		//right shift as L/R == 0
 		else
-		{
 			//simply moves each bit to the right by count number of times. 
 			//the least-significant bit is inserted on the other end. 
-			answer = cr;
-			while(count>0) {
-				int temp = answer>>2;
-				//if(temp == answer/2) => MSB is not set, hence answer = temp
-				if(temp == answer/2) {
-					answer = temp;
-					count--;
-				}
-				//if(temp != answer*2) => MSB is set, set LSB=1
-				else {
-					answer = temp | (int)Math.pow(2,15);
-                    count--;
-				}	
-			}
-		}
+			answer = (cr >> count) | (cr << (16 - count));
+		
+		//loading resultant answer into the register
 		switch (r) {
 		case 0:
 			updateRegister("R0", Utilities.dec2bin(answer, 16));
@@ -1354,7 +1390,8 @@ public class Simulator {
 			break;
 		}
 		return;		
-	}    
+	}
+
         private void executeSRC(int[] R, int[] Count, int[] RL, int[] I) {
             //decoding the contents of R
             int r = Utilities.bin2dec(R);
@@ -1478,55 +1515,108 @@ public class Simulator {
         }
     
         //function to multiply Register by Register
-        private void executeMLT(int[] RX, int[] RY, int[] I, int[] address) {
-            //decoding the contents of R
-            int rx = Utilities.bin2dec(RX);
-            //decoding the contents of IX
-            int ry = Utilities.bin2dec(RY);
-            //loading the of rx,ry to crx,cry respectively, according to the register number
-            int crx=0,cry=0;
-            if((rx==0 || rx==2) && (ry==0 || ry==2)) {
-                if(rx==0)
-                    crx = Utilities.bin2dec(this.R0);//contains contents of R0
-                else if(rx==2)
-                    crx = Utilities.bin2dec(this.R2);//contains contents of R2
-                
-                if(ry==0)
-                    cry = Utilities.bin2dec(this.R0);//contains contents of R0
-                else if(ry==2)
-                    cry = Utilities.bin2dec(this.R2);//contains contents of R2
-            }
-            //rx & ry must be either R0 or R2, hence exiting the code if data is loaded in wrong registers
-            else {
-                System.out.print("Kindly load the data in register 0 or 2");
-                return;
-            }
-            //multiplying the contents of rx and ry
-            int result = crx*cry;
-            //as rx&rx+1 has 32 bits in total, maximum value that can be stored == 4,294,967,295
-            if(result< (int)Math.pow(2, 31)-1) {
-                //calculating the high order bits
-                int ch = result/100;
-                //calculating the low order bits
-                int cl = result%100;
-                if(rx==0) {
-                    //updating register rx with high order bits--ch
-                    updateRegister("R0", Utilities.dec2bin(ch, 16));
-                    //updating register rx+1 with high order bits--cl
-                    updateRegister("R1", Utilities.dec2bin(cl, 16));
-                }
-                if(rx==2) {
-                    //updating register rx with high order bits--ch
-                    updateRegister("R2", Utilities.dec2bin(ch, 16));
-                    //updating register rx+1 with high order bits--cl
-                    updateRegister("R3", Utilities.dec2bin(cl, 16));
-                }
-                
-            }
-            //if result is greater than 4,294,967,295, setting the overflow flag 
-            else
-                executeJCC(new int[]{0},RY,I,address);
-        }
+	private void executeMLT(int[] RX, int[] RY, int[] I, int[] address) {
+		//decoding the contents of R
+		int rx = Utilities.bin2dec(RX);
+		//decoding the contents of IX
+		int ry = Utilities.bin2dec(RY);
+		//loading the of rx,ry to crx,cry respectively, according to the register number
+		int crx=0,cry=0;
+		if((rx==0 || rx==2) && (ry==0 || ry==2)) {
+			if(rx==0)
+				crx = Utilities.bin2dec(this.R0);//contains contents of R0
+			else if(rx==2)
+				crx = Utilities.bin2dec(this.R2);//contains contents of R2
+			
+			if(ry==0)
+				cry = Utilities.bin2dec(this.R0);//contains contents of R0
+			else if(ry==2)
+				cry = Utilities.bin2dec(this.R2);//contains contents of R2
+		}
+		//rx & ry must be either R0 or R2, hence exiting the code if data is loaded in wrong registers
+		else {
+			System.out.print("Kindly load the data in register 0 or 2");
+			return;
+		}
+		//multiplying the contents of rx and ry
+		long result = crx*cry;
+		//as rx&rx+1 has 32 bits in total, maximum value that can be stored == 2,147,483,647
+		if(result< (int)Math.pow(2, 31)-1) {
+			//calucating the MSB in answer
+			long highestBitVal = Long.highestOneBit(result);
+			//calculating total number of bits required to store answer
+			int resultSize = 0;
+			while (highestBitVal != 0 && highestBitVal != 1) {
+				highestBitVal >>>= 1;
+				resultSize++;
+			}
+			int ch, cl;//variables to store higher and lower bits in result
+			//if resultSize is <16 => result will fit into one register. 
+			//therefore, high order bits == 0
+			if (resultSize < 16) {
+				ch = 0;
+				cl = (int)result;
+			} 
+			//if resultSize is >16 => number will take two registers. 
+			else {
+				ch = (int)(result >>> 16);
+				cl = (int)(result << 64 - 16);
+			}
+			
+			if(rx==0) {
+				//updating register rx with high order bits--ch
+				updateRegister("R0", Utilities.dec2bin(ch, 16));
+				//updating register rx+1 with high order bits--cl
+				updateRegister("R1", Utilities.dec2bin(cl, 16));
+			}
+			if(rx==2) {
+				//updating register rx with high order bits--ch
+				updateRegister("R2", Utilities.dec2bin(ch, 16));
+				//updating register rx+1 with high order bits--cl
+				updateRegister("R3", Utilities.dec2bin(cl, 16));
+			}
+			
+		}
+		//if result is greater than 2,147,483,647, setting the overflow flag 
+		else
+			executeJCC(new int[]{0},RY,I,address);
+	}
+
+    //Jump and Save Return Address: stops the current execution and jumps to instruction in EA
+    //R3 -> PC+1;
+    //PC -> EA
+    private void executeJSR(int[] R, int[] IX, int[] I, int[] address) {
+    	// calculating effective address
+    	int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		// adding contents of IR to EA. EA = c(address) + c(IX)
+		int indexingRegister = Utilities.bin2dec(IX);
+		switch (indexingRegister) {
+		// c(iX)
+		case 0:
+			break;
+		case 1:
+			effectiveAddress += Utilities.bin2dec(this.X1);
+			break;
+		case 2:
+			effectiveAddress += Utilities.bin2dec(this.X2);
+			break;
+		case 3:
+			effectiveAddress += Utilities.bin2dec(this.X3);
+		default:
+			System.out.println("Unknown indexing register passed");
+            this.halted = true;
+		}
+		// indirect addressing
+		// ea=c(c(iX)+c(addressField))
+		if (I[0] == 1) {
+			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+			load();// mbr has c(c(ir)+c(addressField))
+			effectiveAddress = Utilities.bin2dec(this.MBR);
+		}
+		int pc = Utilities.bin2dec(this.PC);
+		updateRegister("R3", Utilities.dec2bin(pc, 16));
+		updateRegister("PC", Utilities.dec2bin(effectiveAddress, 16));
+	}
 
     /**
      * Loads from memory the contents at the address specified by the MAR into the MBR.
