@@ -372,7 +372,7 @@ public class Simulator {
 		if (I[0] == 1) {
 			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
 			load();// mbr has c(c(ir)+c(addressField))
-			effectiveAddress = Utilities.bin2dec(this.MBR);
+			effectiveAddress = Utilities.bin2decNegative(this.MBR);
 		}
 		//copying effective address to MBR
 		updateRegister("MBR", Utilities.dec2bin(effectiveAddress, 16));
@@ -1134,7 +1134,7 @@ public class Simulator {
      * Loads from memory the contents at the address specified by the MAR into the MBR.
      */
     public void load() {
-        int[] v = this.M.get(Utilities.bin2dec(this.MAR));
+        int[] v = this.M.get(Utilities.bin2decNegative(this.MAR));
         for (int i = 0; i < this.MBR.length; i++) {
             this.MBR[i] = v[i];
         }
@@ -1146,7 +1146,7 @@ public class Simulator {
      * Stores in memory the contents in MBR at the address specified by the MAR.
      */
     public void store() {
-        this.M.set(Utilities.bin2dec(this.MAR), this.MBR);
+        this.M.set(Utilities.bin2deNegative(this.MAR), this.MBR);
         // Notify the interface that changes may have been made
         this.I.updateDisplay();
     }
