@@ -269,12 +269,12 @@ public class Interface extends JFrame {
     }
 
     public JButton createProgram_1Button() {
-        // Create the single step button
+        // Create the program 1 button
         JButton button = new JButton("Program 1");
         button.setPreferredSize((new Dimension(100,50)));
         button.setFocusable(false);
 
-        // Add an action listener that can call the simulator's step function upon this button being clicked
+        // Add an action listener that can call the simulator's program 1 function upon this button being clicked
         button.addActionListener(new InterfaceActionListener(this.S) {
             public void actionPerformed(ActionEvent e) {
                 p1_flag = true;
@@ -286,13 +286,17 @@ public class Interface extends JFrame {
         return button;
     }
 
+    // create a text field for th ui 
     public JTextField createTextField(){
         JTextField input = new JTextField(1);
         input.setText("");
         input.requestFocus();        // start with focus on this field
 
+        // Add an action listener for the console keyboard of the ui
         input.addActionListener(new TextFieldListener(){
             public void actionPerformed(ActionEvent e) {
+                // check if the user is has given an IN/OUT instruction or have used the program 1 button then allow input
+                // else deny input
                 if(allowInput){
                     String inputString = input.getText();
                     p1_input.add(input.getText());
@@ -316,8 +320,8 @@ public class Interface extends JFrame {
         return input;
     }
 
+    //create text area for the ui to show user's input data and the output
     public JTextArea createTextArea(int row, int col) {
-        // Interface I = new Interface(S);
         JTextArea output = new JTextArea(row, col);
         output.setEditable(false);
 
@@ -328,17 +332,12 @@ public class Interface extends JFrame {
         int[] input = new int[inputSize]; 
         for (int i = 0; i < input.length; i++) {
             input[i] = Integer.parseInt(p1_input.get(i), 16);            
-            // input[i] = Integer.parseInt(in.nextLine(), 16);            
         }
-        // PrintInput(input);
 
-        output.setText("what number do you wanna search? ");
-        // System.out.println("what number do you wanna search? ");
-        String search = JOptionPane.showInputDialog("what number do you wanna search?");
-        // in.close();
+        output.setText("Enter the number you want to search ");
+        String search = JOptionPane.showInputDialog("Enter the number you want to search ");
         Arrays.sort(input);
         int closestNumber = Utilities.findClosest(input, Integer.parseInt(search, 16));
-        // System.out.println("Searching "+ search + "... \n" + "Yay! found something, here you go " + Integer.toHexString(closestNumber));
         output.setText("Searching "+ search + "... \n" + "Yay! found something, here you go " + Integer.toHexString(closestNumber) + " (hex)");
         p1_flag = false;
         allowInput = false;
