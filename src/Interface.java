@@ -90,10 +90,10 @@ public class Interface extends JFrame {
         topPanel.add(memRegPanel, BorderLayout.EAST);
 
         splitPane = new JSplitPane();
-        splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);  
-        splitPane.setDividerLocation(700);                    
-        splitPane.setTopComponent(topPanel);                  
-        splitPane.setBottomComponent(textPanel); 
+        splitPane.setOrientation(JSplitPane.VERTICAL_SPLIT);              
+        splitPane.setDividerLocation(500);
+        splitPane.setTopComponent(topPanel);
+        splitPane.setBottomComponent(textPanel);
 
         consolePrinter = new JLabel("Console Printer");
         // consolePrinter.setLabelFor(output);
