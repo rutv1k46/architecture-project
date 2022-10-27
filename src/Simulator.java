@@ -271,7 +271,7 @@ public class Simulator {
     private void executeLDR(int[] R, int[] IX, int[] I, int[] address) {
 
 		// calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		int indexingRegister = Utilities.bin2dec(IX);
 		switch (indexingRegister) {
@@ -326,7 +326,7 @@ public class Simulator {
 	private void executeSTR(int[] R, int[] IX, int[] I, int[] address) {
 		// TODO Auto-generated method stub
 		// calculating effective address
-		int effectiveAddress = 0;
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// copying contents of IR to EA
 		int indexingRegister = Utilities.bin2dec(IX);
 		switch (indexingRegister) {
@@ -346,7 +346,7 @@ public class Simulator {
             this.halted = true;
 		}
 		// c(addressField)
-		effectiveAddress += Utilities.bin2dec(address);// c(ir)+c(address)
+		// effectiveAddress += Utilities.bin2dec(address);// c(ir)+c(address)
 		// indirect addressing
 		// ea=c(c(iX)+c(addressField))
 
@@ -382,7 +382,7 @@ public class Simulator {
 	private void executeLDA(int[] R, int[] IX, int[] I, int[] address) {
 
 		// calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		int indexingRegister = Utilities.bin2dec(IX);
 		switch (indexingRegister) {
@@ -437,7 +437,7 @@ public class Simulator {
 	private void executeLDX(int[] R, int[] IX, int[] I, int[] address) {
 
 		// calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		int indexingRegister = Utilities.bin2dec(IX);
 		switch (indexingRegister) {
@@ -487,59 +487,59 @@ public class Simulator {
     //copying value from index register to effective register
 	private void executeSTX(int[] R, int[] IX, int[] I, int[] address) {
 		// calculating effective address
-				int effectiveAddress = 0;
-				// copying contents of IR to EA
-				int indexingRegister = Utilities.bin2dec(IX);
-				switch (indexingRegister) {
-				// c(iX)
-				case 0:
-					break;
-				case 1:
-					effectiveAddress += Utilities.bin2dec(this.X1);
-					break;
-				case 2:
-					effectiveAddress += Utilities.bin2dec(this.X2);
-					break;
-				case 3:
-					effectiveAddress += Utilities.bin2dec(this.X3);
-				default:
-					System.out.println("Unknown indexing register passed");
-                    this.halted = true;
-				}
-				// c(addressField)
-				effectiveAddress += Utilities.bin2dec(address);// c(ir)+c(address)
-				// indirect addressing
-				// ea=c(c(iX)+c(addressField))
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
+        // copying contents of IR to EA
+        int indexingRegister = Utilities.bin2dec(IX);
+        switch (indexingRegister) {
+        // c(iX)
+        case 0:
+            break;
+        case 1:
+            effectiveAddress += Utilities.bin2dec(this.X1);
+            break;
+        case 2:
+            effectiveAddress += Utilities.bin2dec(this.X2);
+            break;
+        case 3:
+            effectiveAddress += Utilities.bin2dec(this.X3);
+        default:
+            System.out.println("Unknown indexing register passed");
+            this.halted = true;
+        }
+        // c(addressField)
+        // effectiveAddress += Utilities.bin2dec(address);// c(ir)+c(address)
+        // indirect addressing
+        // ea=c(c(iX)+c(addressField))
 
-				if (I[0] == 1) {
-					updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
-					load();// mbr has c(c(ir)+c(addressField))
-					effectiveAddress = Utilities.bin2dec(this.MBR);// c(c(ir)+c(addressField))
-				}
-				updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); // copies EA to MAR
+        if (I[0] == 1) {
+            updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
+            load();// mbr has c(c(ir)+c(addressField))
+            effectiveAddress = Utilities.bin2dec(this.MBR);// c(c(ir)+c(addressField))
+        }
+        updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); // copies EA to MAR
 
-				switch (indexingRegister) {
-				case 1:
-					registerCopy(this.X1, this.MBR);
-					break;
-				case 2:
-					registerCopy(this.X2, this.MBR);
-					break;
-				case 3:
-					registerCopy(this.X3, this.MBR);
-					break;
-				default:
-					System.out.println("Unknown indexing register passed");
-                    this.halted = true;
-				}
-				store();
-				this.I.updateDisplay();
+        switch (indexingRegister) {
+        case 1:
+            registerCopy(this.X1, this.MBR);
+            break;
+        case 2:
+            registerCopy(this.X2, this.MBR);
+            break;
+        case 3:
+            registerCopy(this.X3, this.MBR);
+            break;
+        default:
+            System.out.println("Unknown indexing register passed");
+            this.halted = true;
+        }
+        store();
+        this.I.updateDisplay();
 	}
 
     // instruction for jump if zero
     public void executeJZ(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		switch (Utilities.bin2dec(IX)) {
 		// c(iX)
@@ -564,7 +564,7 @@ public class Simulator {
 			updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12));
 			load();// mbr has c(c(ir)+c(addressField))
 			effectiveAddress = Utilities.bin2dec(this.MBR);
-		}
+        }
 		updateRegister("MAR", Utilities.dec2bin(effectiveAddress, 12)); //// c(c(ir)+c(addressField)); copies EA to MAR
 		load(); // copies contents in address of MAR to MBR
 		this.I.updateDisplay();
@@ -615,7 +615,7 @@ public class Simulator {
     //instruction for jump if not equal
     public void executeJNE(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		switch (Utilities.bin2dec(IX)) {
 		// c(iX)
@@ -691,7 +691,7 @@ public class Simulator {
     //instruction for jump if condition code
     public void executeJCC(int[] CC, int[] IX, int[] I, int[] address){
         // calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		switch (Utilities.bin2dec(IX)) {
 		// c(iX)
@@ -736,7 +736,7 @@ public class Simulator {
     // instruction for unconditional jump to address
     public void executeJMA(int[] IX, int[] I, int[] address){
         // calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		int indexingRegister = Utilities.bin2dec(IX);
 		switch (indexingRegister) {
@@ -771,7 +771,7 @@ public class Simulator {
     // instruction for jump if greater than or equal to
     public void executeJGE(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		int indexingRegister = Utilities.bin2dec(IX);
 		switch (indexingRegister) {
@@ -848,7 +848,7 @@ public class Simulator {
     // instruction for subtract one and branch
     public void executeSOB(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		// int indexingRegister = Utilities.bin2dec(IX);
 		switch (Utilities.bin2dec(IX)) {
@@ -930,7 +930,7 @@ public class Simulator {
     // instruction for add memory to register 
     public void executeAMR(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		// int indexingRegister = Utilities.bin2dec(IX);
 		switch (Utilities.bin2dec(IX)) {
@@ -984,7 +984,7 @@ public class Simulator {
     // instruction for subtract memory from the register
     public void executeSMR(int[] R, int[] IX, int[] I, int[] address){
         // calculating effective address
-		int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		// int indexingRegister = Utilities.bin2dec(IX);
 		switch (Utilities.bin2dec(IX)) {
@@ -1190,7 +1190,7 @@ public class Simulator {
         // if c(rx) = c(ry) then cc(4) = 1
         // else set cc(4) = 0
         if (Utilities.bin2dec(targetRegister) == Utilities.bin2dec(targetIndexRegister)){
-            this.CC = Utilities.dec2bin(8, 4);
+            this.CC = Arrays.copyOfRange(Utilities.dec2bin(8, 6), 2, 6);
         }
         else{
             this.CC = Utilities.dec2bin(0, 4);
@@ -1587,7 +1587,7 @@ public class Simulator {
     //PC -> EA
     private void executeJSR(int[] R, int[] IX, int[] I, int[] address) {
     	// calculating effective address
-    	int effectiveAddress = Utilities.bin2dec(address); // ea = c(address)
+		int effectiveAddress = Utilities.bin2dec(this.M.get(Utilities.bin2dec(address))); // ea = c(address)
 		// adding contents of IR to EA. EA = c(address) + c(IX)
 		int indexingRegister = Utilities.bin2dec(IX);
 		switch (indexingRegister) {
@@ -1615,7 +1615,7 @@ public class Simulator {
 		}
 		int pc = Utilities.bin2dec(this.PC);
 		updateRegister("R3", Utilities.dec2bin(pc, 16));
-		updateRegister("PC", Utilities.dec2bin(effectiveAddress, 16));
+		updateRegister("PC", Utilities.dec2bin(effectiveAddress, 12));
 	}
 
     /**
