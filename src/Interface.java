@@ -154,6 +154,7 @@ public class Interface extends JFrame {
         // Create a store button that stores into the memory at address MAR the value in MBR
         buttonPanel.add(createRunButton());
         buttonPanel.add(createProgram_1Button());
+        buttonPanel.add(createLoadInsButton());
 
         /*
         this.panel.add(new JButton("Store"));// stores MBR values at MAR address
@@ -240,6 +241,8 @@ public class Interface extends JFrame {
         button.addActionListener(new InterfaceActionListener(this.S) {
             public void actionPerformed(ActionEvent e) {
                 this.S.load();
+                this.S.registerCopy(this.S.MAR, this.S.PC);
+                updateDisplay();
             }
         });
 
@@ -279,6 +282,23 @@ public class Interface extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 p1_flag = true;
                 allowInput = true;
+            }
+        });
+
+        // Return this button
+        return button;
+    }
+
+    public JButton createLoadInsButton() {
+        // Create the program 1 button
+        JButton button = new JButton("<html><center>"+"Load"+"<br>"+"Instructions"+"</center></html>");
+        button.setPreferredSize((new Dimension(120,50)));
+        button.setFocusable(false);
+
+        // Add an action listener that can call the simulator's program 1 function upon this button being clicked
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                this.S.loadInstruction();
             }
         });
 

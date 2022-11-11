@@ -178,4 +178,14 @@ public class Utilities {
         else
             return val1;       
     }
+
+    public static int[] str2intArray(String str){
+        int[] arr = new int[str.length()];
+      
+            // Copying character by character into array
+            for (int i = 0; i < str.length(); i++) {
+                arr[i] = Integer.parseInt(String.valueOf(str.charAt(i)));
+            }
+        return arr;
+    }
 }

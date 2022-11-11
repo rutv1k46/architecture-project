@@ -51,8 +51,8 @@ public class Simulator {
     /** Boolean which indicates whether the machine is currently halted. */
     boolean halted = true;
 
-    int[] MAR_INIT = new int[100];
-    int lines = 0;
+    // int[] MAR_INIT = new int[100];
+    // int lines = 0;
 
     /** An interface that is notified when the state of this simulated machine changes. */
     Interface I;
@@ -1327,7 +1327,24 @@ public class Simulator {
         // if devid = 1 then allow input and output whatever the user enter onto the console printer
         // else deny input
         if (Utilities.bin2dec(address) == 1){
-            this.I.output.setText(JOptionPane.showInputDialog(""));
+            // this.I.output.setText(JOptionPane.showInputDialog(""));
+            switch(Utilities.bin2dec(R)){
+                case 0:
+                    this.I.output.setText(Arrays.toString(this.R0));
+                    break;
+                case 1:
+                    this.I.output.setText(Arrays.toString(this.R1));
+                    break;
+                case 2:
+                    this.I.output.setText(Arrays.toString(this.R2));
+                    break;
+                case 3:
+                    this.I.output.setText(Arrays.toString(this.R3));
+                    break;
+                default:
+                    System.out.println("Unknown register passed");
+                    this.halted = true;
+            }
         }
         else{
             this.I.MessageDialog("Wrong Devid");
@@ -1623,6 +1640,32 @@ public class Simulator {
 		updateRegister("PC", Utilities.dec2bin(effectiveAddress, 12));
 	}
 
+    public void loadInstruction(){
+        try{
+            JFileChooser fileChooser = new JFileChooser();
+            int returnValue = fileChooser.showOpenDialog(null);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
+                FileInputStream fstream = new FileInputStream(selectedFile);
+                DataInputStream in = new DataInputStream(fstream);
+                BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                String strLine;
+                int[] IR_INIT = new int[16];
+
+                while ((strLine = br.readLine()) != null)   {
+                    String[] tokens = strLine.split(" ");
+
+                    IR_INIT = Utilities.str2intArray(tokens[1]);                    
+                    this.M.set(Integer.parseInt(tokens[0], 16), IR_INIT);
+                }           
+                in.close();
+                System.out.println(this.M);
+            }
+        }catch (Exception err){
+              System.err.println("Error: " + err.getMessage());
+            }
+    }
+
     /**
      * Loads from memory the contents at the address specified by the MAR into the MBR.
      */
@@ -1658,16 +1701,11 @@ public class Simulator {
                 BufferedReader br = new BufferedReader(new InputStreamReader(in));
                 String strLine;
                 int[] MBR_INIT = new int[16];
-                int count = 0; 
 
                 while ((strLine = br.readLine()) != null)   {
                     String[] tokens = strLine.split(" ");
 
-                    MBR_INIT = Utilities.hex2bin(tokens[1], 16);
-                    MAR_INIT[count] = Integer.parseInt(tokens[0], 16);
-                    count += 1;
-                    lines += 1;
-                    
+                    MBR_INIT = Utilities.hex2bin(tokens[1], 16);                    
                     this.M.set(Integer.parseInt(tokens[0], 16), MBR_INIT);
                 }           
                 in.close();
