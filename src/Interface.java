@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import javax.swing.border.EmptyBorder;
 import java.util.*;
+import java.io.*;
+
 /**
  * A graphical user interface for using the simulated computer
  */
@@ -21,7 +23,7 @@ public class Interface extends JFrame {
     ArrayList<String> p1_input = new ArrayList<String>();
     int count = 0;
     int inputSize = 20;
-    boolean p1_flag, allowInput = false;
+    boolean p1_flag, p2_flag, allowInput = false;
 
 
     /** A simulator for this interace to interact with and display. */
@@ -153,7 +155,7 @@ public class Interface extends JFrame {
 
         // Create a store button that stores into the memory at address MAR the value in MBR
         buttonPanel.add(createRunButton());
-        buttonPanel.add(createProgram_1Button());
+        buttonPanel.add(createProgram_2Button());
         buttonPanel.add(createLoadInsButton());
 
         /*
@@ -289,6 +291,25 @@ public class Interface extends JFrame {
         return button;
     }
 
+    public JButton createProgram_2Button() {
+        // Create the program 1 button
+        JButton button = new JButton("Program 2");
+        button.setPreferredSize((new Dimension(100,50)));
+        button.setFocusable(false);
+
+        // Add an action listener that can call the simulator's program 1 function upon this button being clicked
+        button.addActionListener(new InterfaceActionListener(this.S) {
+            public void actionPerformed(ActionEvent e) {
+                p2_flag = true;
+                allowInput = true;
+                prgrm_2();
+            }
+        });
+
+        // Return this button
+        return button;
+    }
+
     public JButton createLoadInsButton() {
         // Create the program 1 button
         JButton button = new JButton("<html><center>"+"Load"+"<br>"+"Instructions"+"</center></html>");
@@ -362,6 +383,61 @@ public class Interface extends JFrame {
         p1_flag = false;
         allowInput = false;
     }
+
+
+    public void prgrm_2() {
+        int senCount = 0;
+        String[] sent = new String[6];
+        try{
+            JFileChooser fileChooser = new JFileChooser();
+            int returnValue = fileChooser.showOpenDialog(null);
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
+                FileInputStream fstream = new FileInputStream(selectedFile);
+                DataInputStream in = new DataInputStream(fstream);
+                BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                String strLine;
+                while ((strLine = br.readLine()) != null)   {
+                    String[] s = strLine.split("[!?.:]+");
+                    
+                    for (String string : s) {
+                        sent[senCount] = string;
+                        senCount += 1;
+                    }
+                }           
+                in.close();
+
+            }
+
+            String search = JOptionPane.showInputDialog("Enter the word you want to search");
+  
+            outerLoop:
+            for (int i = 0; i < sent.length; i++) {
+                if(sent[i].toLowerCase().contains(search.toLowerCase())){
+                    int wordCount = 0; 
+                    String[] words = sent[i].trim().split("\\W+");
+                    
+                    innerLoop:
+                    for (String word : words) {
+                        if(word.toLowerCase().equals(search.toLowerCase())){
+                            // System.out.println("word '" + search + "' was found in " + "sentence #" + (i+1) + " and it is the " + (wordCount+1) + "th word of that sentence");
+                            output.setText("word '" + search + "' was found in " + "sentence #" + (i+1) + " and it is the " + (wordCount+1) + "th word of that sentence");
+                            break outerLoop;
+                        }
+                        else{
+                            output.setText("word '" + search + "' not found");
+                        }
+                        wordCount += 1;
+                    }
+                }   
+            }
+            p2_flag = false;
+            allowInput = false;
+        }catch (Exception err){
+              System.err.println("Error: " + err.getMessage());
+        }
+    }
+
 
     /**
      * Updates the display based on the values in the simulator S
