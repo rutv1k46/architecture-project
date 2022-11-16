@@ -386,8 +386,8 @@ public class Interface extends JFrame {
 
 
     public void prgrm_2() {
-        int senCount = 0;
-        String[] sent = new String[6];
+        boolean found = false;
+        ArrayList<String> sent = new ArrayList<String>();
         try{
             JFileChooser fileChooser = new JFileChooser();
             int returnValue = fileChooser.showOpenDialog(null);
@@ -401,8 +401,7 @@ public class Interface extends JFrame {
                     String[] s = strLine.split("[!?.:]+");
                     
                     for (String string : s) {
-                        sent[senCount] = string;
-                        senCount += 1;
+                        sent.add(string);
                     }
                 }           
                 in.close();
@@ -412,24 +411,24 @@ public class Interface extends JFrame {
             String search = JOptionPane.showInputDialog("Enter the word you want to search");
   
             outerLoop:
-            for (int i = 0; i < sent.length; i++) {
-                if(sent[i].toLowerCase().contains(search.toLowerCase())){
+            for (int i = 0; i < sent.size(); i++) {
+                if(sent.get(i).toLowerCase().contains(search.toLowerCase())){
                     int wordCount = 0; 
-                    String[] words = sent[i].trim().split("\\W+");
+                    String[] words = sent.get(i).trim().split("\\W+");
                     
                     innerLoop:
                     for (String word : words) {
                         if(word.toLowerCase().equals(search.toLowerCase())){
-                            // System.out.println("word '" + search + "' was found in " + "sentence #" + (i+1) + " and it is the " + (wordCount+1) + "th word of that sentence");
                             output.setText("word '" + search + "' was found in " + "sentence #" + (i+1) + " and it is the " + (wordCount+1) + "th word of that sentence");
+                            found = true;
                             break outerLoop;
-                        }
-                        else{
-                            output.setText("word '" + search + "' not found");
                         }
                         wordCount += 1;
                     }
                 }   
+            }
+            if(!found){
+                output.setText("word '" + search + "' not found");
             }
             p2_flag = false;
             allowInput = false;
