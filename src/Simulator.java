@@ -51,6 +51,10 @@ public class Simulator {
     /** Boolean which indicates whether the machine is currently halted. */
     boolean halted = true;
 
+    /** Two-bit branch prediction buffer. */
+    int branchPredict = 0; // can be 0, 1, 2, 3, corresponding to
+                            // 00, 01, 10, 11 (all possible 2-bit states)
+
     // int[] MAR_INIT = new int[100];
     // int lines = 0;
 
@@ -580,34 +584,45 @@ public class Simulator {
             case 0:
                 if (Utilities.bin2dec(this.R0) == 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                    branchTaken();System.out.println("Branch taken! now this.branchPredict = " + this.branchPredict);
                 }
                 else{
                     ;
+                    branchNotTaken();System.out.println("Branch not taken! now this.branchPredict = " + this.branchPredict);
                 }
                 break;
             case 1:
                 if (Utilities.bin2dec(this.R1) == 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                    branchTaken();System.out.println("Branch taken! now this.branchPredict = " + this.branchPredict);
+
                 }
                 else{
                     ;
+                    branchNotTaken();System.out.println("Branch not taken! now this.branchPredict = " + this.branchPredict);
                 }
                 break;
 
             case 2:
                 if (Utilities.bin2dec(this.R2) == 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                    branchTaken();System.out.println("Branch taken! now this.branchPredict = " + this.branchPredict);
+
                 }
                 else{
                     ;
+                    branchNotTaken();System.out.println("Branch not taken! now this.branchPredict = " + this.branchPredict);
                 }
                 break;
             case 3:
                 if (Utilities.bin2dec(this.R3) == 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                    branchTaken();System.out.println("Branch taken! now this.branchPredict = " + this.branchPredict);
+
                 }
                 else{
                     ;
+                    branchNotTaken();System.out.println("Branch not taken! now this.branchPredict = " + this.branchPredict);
                 }
                 break;
             default:
@@ -656,34 +671,47 @@ public class Simulator {
             case 0:
                 if (Utilities.bin2dec(this.R0) != 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                    branchTaken();System.out.println("Branch taken! now this.branchPredict = " + this.branchPredict);
+
                 }
                 else{
                     ;
+                    branchNotTaken();System.out.println("Branch not taken! now this.branchPredict = " + this.branchPredict);
                 }
                 break;
             case 1:
                 if (Utilities.bin2dec(this.R1) != 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                    branchTaken();System.out.println("Branch taken! now this.branchPredict = " + this.branchPredict);
+
                 }
                 else{
                     ;
+                    branchNotTaken();System.out.println("Branch not taken! now this.branchPredict = " + this.branchPredict);
                 }
                 break;
 
             case 2:
                 if (Utilities.bin2dec(this.R2) != 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                    branchTaken();System.out.println("Branch taken! now this.branchPredict = " + this.branchPredict);
+
                 }
                 else{
                     ;
+                    branchNotTaken();System.out.println("Branch not taken! now this.branchPredict = " + this.branchPredict);
                 }
                 break;
             case 3:
                 if (Utilities.bin2dec(this.R3) != 0){
                     registerCopy(Utilities.dec2bin(effectiveAddress, 12), this.PC);
+                    branchTaken();System.out.println("Branch taken! now this.branchPredict = " + this.branchPredict);
+
                 }
                 else{
-                    ;
+                    ;                    
+                    branchNotTaken();System.out.println("Branch not taken! now this.branchPredict = " + this.branchPredict);
+
                 }
                 break;
             default:
@@ -1877,6 +1905,30 @@ public class Simulator {
         // Perform the copy
         for (int i = 0; i < from.length; i++) {
             to[i] = from[i];
+        }
+    }
+
+    /**
+     * If a branch is taken this method (branchTaken()) is called and the branch predictor is notified 
+     * and updated accordingly. If the branch predictor is in state 00 it goes to 01; if in 01
+     * goes to 10; if in 10 goes to 11 and finally if in 11 stays in 11.
+     */
+    public void branchTaken() {
+        this.branchPredict += 1;
+        if (this.branchPredict == 4) {
+            branchPredict = 3;
+        }
+    }
+    
+    /**
+     * If a branch is not taken this method (branchNotTaken()) is called and the branch predictor is notified 
+     * and updated accordingly. If the branch predictor is in state 00 it stays in 01; if in 01
+     * goes to 00; if in 10 goes to 01 and finally if in 11 goes to 10.
+     */
+    public void branchNotTaken() {
+        this.branchPredict -= 1;
+        if (this.branchPredict == -1) {
+            branchPredict = 0;
         }
     }
 }
