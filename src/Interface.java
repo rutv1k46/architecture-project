@@ -121,7 +121,7 @@ public class Interface extends JFrame {
         this.add(splitPane);
         // Set visibile
         this.setVisible(true);
-        // pack();
+        pack();
     }
 
     /**
@@ -172,8 +172,8 @@ public class Interface extends JFrame {
      */
     public JButton createStepButton() {
         // Create the single step button
-        JButton button = new JButton("Single Step");
-        button.setPreferredSize((new Dimension(100,50)));
+        JButton button = new JButton("<html><center>"+"Single"+"<br>"+"Step"+"</center></html>");
+        button.setPreferredSize((new Dimension(80,50)));
         button.setFocusable(false);
 
         // Add an action listener that can call the simulator's step function upon this button being clicked
@@ -193,7 +193,7 @@ public class Interface extends JFrame {
     public JButton createRunButton() {
         // Create the single step button
         JButton button = new JButton("Run");
-        button.setPreferredSize((new Dimension(100,50)));
+        button.setPreferredSize((new Dimension(60,50)));
         button.setFocusable(false);
 
         // Add an action listener that can call the simulator's step function upon this button being clicked
@@ -214,7 +214,7 @@ public class Interface extends JFrame {
         // Create the init button
         JButton button = new JButton("Init");
         button.setForeground(Color.RED);
-        button.setPreferredSize((new Dimension(100,50)));
+        button.setPreferredSize((new Dimension(65,50)));
         button.setFocusable(false);
 
 
@@ -235,7 +235,7 @@ public class Interface extends JFrame {
     public JButton createLoadButton() {
         // Create the load button
         JButton button = new JButton("Load");
-        button.setPreferredSize((new Dimension(100,50)));
+        button.setPreferredSize((new Dimension(65,50)));
         button.setFocusable(false);
 
 
@@ -258,7 +258,7 @@ public class Interface extends JFrame {
     public JButton createStoreButton() {
         // Create the store button
         JButton button = new JButton("Store");
-        button.setPreferredSize((new Dimension(100,50)));
+        button.setPreferredSize((new Dimension(65,50)));
         button.setFocusable(false);
 
 
@@ -276,7 +276,7 @@ public class Interface extends JFrame {
     public JButton createProgram_1Button() {
         // Create the program 1 button
         JButton button = new JButton("Program 1");
-        button.setPreferredSize((new Dimension(100,50)));
+        button.setPreferredSize((new Dimension(80,50)));
         button.setFocusable(false);
 
         // Add an action listener that can call the simulator's program 1 function upon this button being clicked
@@ -294,7 +294,7 @@ public class Interface extends JFrame {
     public JButton createProgram_2Button() {
         // Create the program 1 button
         JButton button = new JButton("Program 2");
-        button.setPreferredSize((new Dimension(100,50)));
+        button.setPreferredSize((new Dimension(80,50)));
         button.setFocusable(false);
 
         // Add an action listener that can call the simulator's program 1 function upon this button being clicked
