@@ -1,0 +1,16 @@
+// an example of testing execuation for branch prediction with the new 2-bit branch predictor
+
+load 1 into R0
+Run JZ on R0: 0010000000000111 // will predict take
+// state should now be 1 still predict take
+Run JZ on R0: 0010000000000111 // will predict take
+// state should now be 2
+Run JZ on R0: 0010000000000111 // will predict take
+// state should still be 2
+load 0 into R0
+Run JZ on R0: 0010000000000111 // will predict not taken
+// state will advance to 3
+Run JZ on R0: 0010000000000111 // will predict not taken
+// state will advance to 0
+Run JZ on R0: 0010000000000111 // will predict taken
+// state will remain at 0
